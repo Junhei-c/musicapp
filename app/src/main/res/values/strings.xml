@@ -3,4 +3,6 @@
     <string name="play_pause_button_desc">Play or Pause the current song</string>
     <string name="song_icon">Song icon</string>
     <string name="default_title">Title</string>
+    <string name="icon">Now playing icon</string>
+
 </resources>
