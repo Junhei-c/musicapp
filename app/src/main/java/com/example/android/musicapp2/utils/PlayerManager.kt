@@ -5,15 +5,15 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 
-class PlayerManager(context: Context) {
+class PlayerManager(private val context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<String> = emptyList()
 
-    var currentIndex = -1
-        private set
-
     private var listener: (() -> Unit)? = null
+
+    var currentIndex: Int = -1
+        private set
 
     init {
         player.addListener(object : Player.Listener {
