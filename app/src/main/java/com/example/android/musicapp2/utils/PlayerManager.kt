@@ -5,8 +5,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 
-
-class PlayerManager(private val context: Context) {
+class PlayerManager(context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<String> = emptyList()
@@ -55,8 +54,6 @@ class PlayerManager(private val context: Context) {
 
     fun isPlaying(): Boolean = player.isPlaying
 
-    fun getCurrentIndex(): Int = currentIndex
-
     fun setOnPlaybackChangedListener(callback: () -> Unit) {
         listener = callback
     }
@@ -65,6 +62,7 @@ class PlayerManager(private val context: Context) {
         player.release()
     }
 }
+
 
 
 

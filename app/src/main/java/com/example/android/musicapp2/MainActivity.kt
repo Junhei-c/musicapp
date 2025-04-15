@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
 import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
@@ -18,7 +17,6 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels { MainViewModelFactory() }
 
     private lateinit var playerManager: PlayerManager
-    private var currentSong: DataModel? = null
     private lateinit var songList: List<DataModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,8 +27,7 @@ class MainActivity : AppCompatActivity() {
         playerManager = PlayerManager(this)
 
         playerManager.setOnPlaybackChangedListener {
-            updateNowPlayingStyle()
-            updatePlayButton()
+            updateNowPlayingUI()
             binding.recyclerViewSongs.adapter?.notifyDataSetChanged()
         }
 
@@ -48,38 +45,44 @@ class MainActivity : AppCompatActivity() {
             songList = list
             playerManager.setPlaylist(list.map { it.url })
             binding.recyclerViewSongs.adapter = SongAdapter(
-                list,
-                { song, index -> playSong(song, index) },
-                { index -> playerManager.getCurrentIndex() == index && playerManager.isPlaying() }
+                songs = list,
+                onSongClick = { song, index ->
+                    playerManager.togglePlayback(index)
+                    updateNowPlayingUI()
+                },
+                isItemPlaying = { index ->
+                    index == playerManager.currentIndex && playerManager.isPlaying()
+                }
             )
         }
     }
 
-    private fun playSong(song: DataModel, index: Int) {
-        currentSong = song
-        playerManager.togglePlayback(index)
-
-        binding.textViewCurrentTitle.text = song.name
-        Glide.with(this).load(song.imageUrl).into(binding.imageViewAlbumArt)
-    }
-
-    private fun updateNowPlayingStyle() {
-        val isPlaying = playerManager.isPlaying()
-        val color = if (isPlaying) getColor(android.R.color.white) else getColor(android.R.color.holo_orange_light)
-        binding.nowPlayingCard.setCardBackgroundColor(color)
-    }
-
-    private fun updatePlayButton() {
-        val icon = if (playerManager.isPlaying()) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
-        binding.buttonPlayPause.setImageResource(icon)
-    }
-
     private fun setupNowPlayingControls() {
         binding.buttonPlayPause.setOnClickListener {
-            val index = playerManager.getCurrentIndex()
-            if (index != -1) {
+            val index = playerManager.currentIndex
+            if (index in songList.indices) {
                 playerManager.togglePlayback(index)
+                updateNowPlayingUI()
+                binding.recyclerViewSongs.adapter?.notifyDataSetChanged()
             }
+        }
+    }
+
+    private fun updateNowPlayingUI() {
+        val index = playerManager.currentIndex
+        if (index in songList.indices) {
+            val song = songList[index]
+
+            binding.textViewCurrentTitle.text = song.name
+
+            val icon = if (playerManager.isPlaying())
+                android.R.drawable.ic_media_pause
+            else
+                android.R.drawable.ic_media_play
+
+            binding.buttonPlayPause.setImageResource(icon)
+        } else {
+            binding.textViewCurrentTitle.text = ""
         }
     }
 
@@ -88,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
 
 
 
