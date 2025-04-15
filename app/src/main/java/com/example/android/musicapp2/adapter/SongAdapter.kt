@@ -2,15 +2,14 @@ package com.example.android.musicapp2.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.musicapp2.databinding.ItemSongBinding
 import com.example.android.musicapp2.model.DataModel
-import com.example.android.musicapp2.utils.PlayerManager
 
 class SongAdapter(
     private val songs: List<DataModel>,
-    private val onSongClick: (DataModel, Int) -> Unit
+    private val onSongClick: (DataModel, Int) -> Unit,
+    private val isItemPlaying: (Int) -> Boolean
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
     inner class SongViewHolder(private val binding: ItemSongBinding) :
@@ -19,26 +18,21 @@ class SongAdapter(
         fun bind(song: DataModel, position: Int) {
             binding.textViewSongName.text = song.name
 
+            val iconRes = if (isItemPlaying(position))
+                android.R.drawable.ic_media_pause
+            else
+                android.R.drawable.ic_media_play
 
-            val isCurrentlyPlaying = PlayerManager::class.java
-                .getDeclaredField("currentIndex")
-                .apply { isAccessible = true }
-                .getInt(PlayerManager(binding.root.context)) == position
+            binding.imageViewPlayPause.setImageResource(iconRes)
 
-            val iconRes = if (isCurrentlyPlaying) android.R.drawable.ic_media_pause
-            else android.R.drawable.ic_media_play
-            binding.buttonPlay.setImageResource(iconRes)
-
-            binding.buttonPlay.setOnClickListener {
+            binding.imageViewPlayPause.setOnClickListener {
                 onSongClick(song, position)
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
-        val binding = ItemSongBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
-        )
+        val binding = ItemSongBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return SongViewHolder(binding)
     }
 
@@ -48,4 +42,5 @@ class SongAdapter(
 
     override fun getItemCount(): Int = songs.size
 }
+
 

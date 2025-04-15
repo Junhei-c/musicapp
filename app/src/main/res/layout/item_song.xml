@@ -18,18 +18,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/buttonPlay"
+            app:layout_constraintEnd_toStartOf="@id/imageViewPlayPause"
             android:layout_marginEnd="8dp"/>
 
         <ImageButton
-            android:id="@+id/buttonPlay"
+            android:id="@+id/imageViewPlayPause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
             android:src="@android:drawable/ic_media_play"
+            android:contentDescription="Play/Pause"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
+

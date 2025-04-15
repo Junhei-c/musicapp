@@ -2,14 +2,32 @@ package com.example.android.musicapp2.utils
 
 import android.content.Context
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 
+
 class PlayerManager(private val context: Context) {
-    private val player = ExoPlayer.Builder(context).build()
+
+    private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<String> = emptyList()
 
     var currentIndex = -1
         private set
+
+    private var listener: (() -> Unit)? = null
+
+    init {
+        player.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                listener?.invoke()
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                currentIndex = player.currentMediaItemIndex
+                listener?.invoke()
+            }
+        })
+    }
 
     fun setPlaylist(urls: List<String>) {
         playlist = urls
@@ -27,10 +45,26 @@ class PlayerManager(private val context: Context) {
         player.playWhenReady = false
     }
 
+    fun togglePlayback(index: Int) {
+        if (currentIndex == index && player.isPlaying) {
+            pause()
+        } else {
+            play(index)
+        }
+    }
+
     fun isPlaying(): Boolean = player.isPlaying
+
+    fun getCurrentIndex(): Int = currentIndex
+
+    fun setOnPlaybackChangedListener(callback: () -> Unit) {
+        listener = callback
+    }
 
     fun release() {
         player.release()
     }
 }
+
+
 
