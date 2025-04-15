@@ -1,0 +1,23 @@
+package com.example.android.musicapp2.viewmodel
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.example.android.musicapp2.model.DataModel
+import com.example.android.musicapp2.repository.DataRepository
+
+class MainViewModel(
+    private val repository: DataRepository
+) : ViewModel() {
+
+    private val _data = MutableLiveData<List<DataModel>>()
+    val data: LiveData<List<DataModel>> get() = _data
+
+    init {
+        fetchData()
+    }
+
+    private fun fetchData() {
+        _data.value = repository.getData()
+    }
+}
