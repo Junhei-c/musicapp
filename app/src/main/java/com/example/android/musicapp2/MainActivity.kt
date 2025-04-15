@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         setupRecyclerView()
         observeSongs()
-        setupPlaybackControls()
+        setupNowPlayingControls()
     }
 
     private fun setupRecyclerView() {
@@ -49,28 +49,49 @@ class MainActivity : AppCompatActivity() {
 
     private fun playSong(song: DataModel, index: Int) {
         currentSong = song
+        playerManager.play(index)
+
+        // UI: Update now playing box
         binding.textViewCurrentTitle.text = song.name
         Glide.with(this).load(song.imageUrl).into(binding.imageViewAlbumArt)
-        playerManager.play(index)
+        updateNowPlayingStyle()
+
+        // UI: Update play/pause icon
         updatePlayButton()
+
+        // Notify adapter of change
+        binding.recyclerViewSongs.adapter?.notifyDataSetChanged()
+    }
+
+    private fun updateNowPlayingStyle() {
+        val isPlaying = playerManager.isPlaying()
+        val backgroundColor = if (isPlaying) {
+            getColor(android.R.color.white)
+        } else {
+            getColor(android.R.color.holo_orange_light)
+        }
+        binding.nowPlayingCard.setCardBackgroundColor(backgroundColor)
     }
 
     private fun updatePlayButton() {
-        val icon = if (playerManager.isPlaying()) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+        val icon = if (playerManager.isPlaying()) android.R.drawable.ic_media_pause
+        else android.R.drawable.ic_media_play
         binding.buttonPlayPause.setImageResource(icon)
     }
 
-    private fun setupPlaybackControls() {
+    private fun setupNowPlayingControls() {
         binding.buttonPlayPause.setOnClickListener {
-            if (playerManager.isPlaying()) {
-                playerManager.pause()
-            } else {
-                currentSong?.let { song ->
-                    val index = songList.indexOf(song)
-                    if (index != -1) playerManager.play(index)
+            val index = playerManager.currentIndex
+            if (index != -1) {
+                if (playerManager.isPlaying()) {
+                    playerManager.pause()
+                } else {
+                    playerManager.play(index)
                 }
+                updatePlayButton()
+                updateNowPlayingStyle()
+                binding.recyclerViewSongs.adapter?.notifyDataSetChanged()
             }
-            updatePlayButton()
         }
     }
 
