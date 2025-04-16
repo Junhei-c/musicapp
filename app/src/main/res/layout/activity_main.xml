@@ -8,58 +8,78 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@color/white">
 
+        <!-- Header -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:title="Music Sample"
+            android:titleTextColor="@android:color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Now Playing -->
         <androidx.cardview.widget.CardView
             android:id="@+id/nowPlayingCard"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="12dp"
-            android:background="#FFF176"
+            android:background="@color/yellow"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="12dp">
 
                 <ImageView
                     android:id="@+id/imageViewNowPlayingIcon"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/song_icon"
-                    android:src="@drawable/ic_launcher_foreground" />
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <TextView
                     android:id="@+id/textViewCurrentTitle"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/imageViewNowPlayingIcon"
-                    android:layout_marginStart="16dp"
-                    android:layout_centerVertical="true"
-                    android:text="@string/default_title"
-                    android:textColor="#000000"
+                    android:text="No Title"
+                    android:textColor="@color/black"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/imageViewNowPlayingIcon"
+                    app:layout_constraintTop_toTopOf="@id/imageViewNowPlayingIcon"
+                    app:layout_constraintBottom_toBottomOf="@id/imageViewNowPlayingIcon"
+                    app:layout_constraintEnd_toStartOf="@id/buttonPlayPause"
+                    android:layout_marginStart="16dp" />
 
                 <ImageButton
                     android:id="@+id/buttonPlayPause"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:background="@android:color/transparent"
                     android:src="@android:drawable/ic_media_play"
-                    android:contentDescription="@string/play_pause_button_desc" />
-            </RelativeLayout>
+                    android:contentDescription="@string/play_pause_button_desc"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Song List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewSongs"
             android:layout_width="0dp"
@@ -71,6 +91,12 @@
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
+
+
+
+
+
+
 
 
 
