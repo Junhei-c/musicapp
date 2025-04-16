@@ -1,8 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App and Toolbar -->
     <string name="app_name">MusicApp</string>
-    <string name="play_pause_button_desc">Play or Pause the current song</string>
+    <string name="toolbar_title">Music App</string>
     <string name="song_icon">Song icon</string>
-    <string name="default_title">Title</string>
-    <string name="icon">Now playing icon</string>
 
+
+    <!-- Now Playing Section -->
+    <string name="default_title">No Title</string>
+    <string name="now_playing_icon">Now playing icon</string>
+    <string name="play_pause_button_desc">Play or pause the current song</string>
 </resources>
+
+

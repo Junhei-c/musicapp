@@ -26,12 +26,19 @@ class MainActivity : AppCompatActivity() {
         MainViewModelFactory(DataRepository())
     }
 
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        playerManager = PlayerManager(this)
+        setSupportActionBar(binding.toolbar)
+
+
+
+    playerManager = PlayerManager(this)
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
         viewModel.data.observe(this) { songList ->

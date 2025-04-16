@@ -10,13 +10,13 @@ class DataRepository {
                 id = 1,
                 name = "Lo-Fi Chime",
                 url = "https://cdn.freesound.org/previews/795/795963_2061858-lq.mp3",
-                imageRes = R.drawable.windchime
+                imageRes = R.drawable.chime
             ),
             DataModel(
                 id = 2,
                 name = "Synth Key",
                 url = "https://cdn.freesound.org/previews/795/795893_462105-lq.mp3",
-                imageRes = R.drawable.piano
+                imageRes = R.drawable.bigpiano
             ),
             DataModel(
                 id = 3,
