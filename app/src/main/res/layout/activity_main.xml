@@ -14,7 +14,7 @@
             android:id="@+id/nowPlayingCard"
             android:layout_width="0dp"
             android:layout_height="200dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="12dp"
             android:background="#FFF176"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
@@ -33,7 +33,7 @@
                     android:layout_height="80dp"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:contentDescription="@string/icon"
+                    android:contentDescription="@string/song_icon"
                     android:src="@drawable/ic_launcher_foreground" />
 
                 <TextView
@@ -46,8 +46,7 @@
                     android:text="@string/default_title"
                     android:textColor="#000000"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    tools:ignore="RelativeOverlap" />
+                    android:textStyle="bold" />
 
                 <ImageButton
                     android:id="@+id/buttonPlayPause"
@@ -72,6 +71,7 @@
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
+
 
 
 

@@ -9,11 +9,10 @@ class PlayerManager(private val context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<String> = emptyList()
-
-    private var listener: (() -> Unit)? = null
-
     var currentIndex: Int = -1
         private set
+
+    private var listener: (() -> Unit)? = null
 
     init {
         player.addListener(object : Player.Listener {
@@ -62,6 +61,7 @@ class PlayerManager(private val context: Context) {
         player.release()
     }
 }
+
 
 
 

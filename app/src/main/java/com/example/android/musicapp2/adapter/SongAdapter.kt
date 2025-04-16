@@ -7,7 +7,7 @@ import com.example.android.musicapp2.databinding.ItemSongBinding
 import com.example.android.musicapp2.model.DataModel
 
 class SongAdapter(
-    private var songs: List<DataModel>,
+    private val songs: List<DataModel>,
     private val onSongClick: (DataModel, Int) -> Unit,
     private val isItemPlaying: (Int) -> Boolean
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
@@ -18,18 +18,16 @@ class SongAdapter(
         fun bind(song: DataModel, position: Int) {
             binding.textViewSongName.text = song.name
             binding.imageViewIcon.setImageResource(song.imageRes)
-
-            val iconRes = if (isItemPlaying(position))
+            binding.textViewNowPlaying.text = if (isItemPlaying(position)) "Playing" else ""
+            val icon = if (isItemPlaying(position))
                 android.R.drawable.ic_media_pause
             else
                 android.R.drawable.ic_media_play
+            binding.buttonPlay.setImageResource(icon)
 
-            binding.buttonPlay.setImageResource(iconRes)
             binding.buttonPlay.setOnClickListener {
                 onSongClick(song, position)
             }
-
-            binding.textViewNowPlaying.text = if (isItemPlaying(position)) "[Now Playing]" else ""
         }
     }
 
@@ -43,16 +41,5 @@ class SongAdapter(
     }
 
     override fun getItemCount(): Int = songs.size
-
-    fun updateSongs(newSongs: List<DataModel>) {
-        this.songs = newSongs
-        notifyDataSetChanged()
-    }
 }
-
-
-
-
-
-
 
