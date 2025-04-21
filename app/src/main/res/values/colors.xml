@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2F88FF</color>
+    <color name="colorPrimary">#43CCF8</color>
     <color name="colorPrimaryVariant">#3700B3</color>
     <color name="colorOnPrimary">#FFFFFF</color>
 
@@ -12,7 +12,7 @@
     <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnBackground">#000000</color>
     <color name="colorOnSurface">#000000</color>
-    <color name="yellow">#FFF176</color>
+    <color name="yellow">#FFF982</color>
 
 
     <color name="black">#000000</color>
