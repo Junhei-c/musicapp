@@ -26,9 +26,6 @@ class MainActivity : AppCompatActivity() {
         MainViewModelFactory(DataRepository())
     }
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -36,9 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
-
-
-    playerManager = PlayerManager(this)
+        playerManager = PlayerManager(this)
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
         viewModel.data.observe(this) { songList ->
@@ -74,16 +69,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateNowPlaying() {
-        if (playerManager.isPlaying()) {
-            binding.textViewCurrentTitle.text = currentSong?.name.orEmpty()
-            binding.textViewCurrentTitle.setTextColor(Color.BLUE)
-            currentSong?.imageRes?.let {
-                binding.imageViewNowPlayingIcon.setImageResource(it)
-            }
-            binding.buttonPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-        } else {
-            binding.buttonPlayPause.setImageResource(android.R.drawable.ic_media_play)
+        val isPlaying = playerManager.isPlaying()
+
+        binding.textViewCurrentTitle.text = currentSong?.name.orEmpty()
+        binding.textViewCurrentTitle.setTextColor(Color.BLUE)
+
+        currentSong?.imageRes?.let {
+            binding.imageViewNowPlayingIcon.setImageResource(it)
         }
+
+        binding.buttonPlayPause.setImageResource(
+            if (isPlaying) R.drawable.iconparkpauseone else R.drawable.iconparkplay
+        )
+
     }
 
     override fun onDestroy() {
@@ -91,6 +89,7 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
 
 
 
