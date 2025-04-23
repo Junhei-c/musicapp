@@ -1,9 +1,9 @@
 package com.example.android.musicapp2
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
@@ -31,48 +31,58 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Set up toolbar and status bar
         setSupportActionBar(binding.toolbar)
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
-        playerManager = PlayerManager(this)
+        // Set up song list RecyclerView
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
+        // Observe data from ViewModel
         viewModel.data.observe(this) { songList ->
-            playerManager.setPlaylist(songList.map { it.url })
+            setupPlayer(songList)
+            setupAdapter(songList)
+        }
 
-            adapter = SongAdapter(
-                songList,
-                onSongClick = { song, index ->
-                    currentSong = song
-                    currentIndex = index
-                    playerManager.togglePlayback(index)
-                    updateNowPlaying()
-                },
-                isItemPlaying = { index ->
-                    index == currentIndex && playerManager.isPlaying()
-                }
-            )
+        // Handle Now Playing card play/pause button
+        binding.buttonPlayPause.setOnClickListener {
+            if (currentIndex == -1) return@setOnClickListener
+            playerManager.togglePlayback(currentIndex)
+            updateNowPlaying()
+        }
+    }
 
-            binding.recyclerViewSongs.adapter = adapter
-
-            playerManager.setOnPlaybackChangedListener {
+    private fun setupPlayer(songList: List<DataModel>) {
+        playerManager = PlayerManager(this).apply {
+            setPlaylist(songList.map { it.url })
+            setOnPlaybackChangedListener {
                 updateNowPlaying()
                 adapter.notifyDataSetChanged()
             }
         }
+    }
 
-        binding.buttonPlayPause.setOnClickListener {
-            if (currentIndex != -1) {
-                playerManager.togglePlayback(currentIndex)
+    private fun setupAdapter(songList: List<DataModel>) {
+        adapter = SongAdapter(
+            songs = songList,
+            onSongClick = { song, index ->
+                currentSong = song
+                currentIndex = index
+                playerManager.togglePlayback(index)
                 updateNowPlaying()
+            },
+            isItemPlaying = { index ->
+                index == currentIndex && playerManager.isPlaying()
             }
-        }
+        )
+        binding.recyclerViewSongs.adapter = adapter
     }
 
     private fun updateNowPlaying() {
         val isPlaying = playerManager.isPlaying()
 
         binding.textViewCurrentTitle.text = currentSong?.name.orEmpty()
-        binding.textViewCurrentTitle.setTextColor(Color.BLUE)
+        binding.textViewCurrentTitle.setTextColor(ContextCompat.getColor(this, R.color.black))
 
         currentSong?.imageRes?.let {
             binding.imageViewNowPlayingIcon.setImageResource(it)
@@ -81,7 +91,6 @@ class MainActivity : AppCompatActivity() {
         binding.buttonPlayPause.setImageResource(
             if (isPlaying) R.drawable.iconparkpauseone else R.drawable.iconparkplay
         )
-
     }
 
     override fun onDestroy() {
@@ -89,6 +98,7 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
 
 
 

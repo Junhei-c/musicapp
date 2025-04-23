@@ -1,9 +1,9 @@
 package com.example.android.musicapp2.adapter
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ItemSongBinding
@@ -19,32 +19,31 @@ class SongAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(song: DataModel, position: Int) {
+            val context = binding.root.context
             val playing = isItemPlaying(position)
 
-            // Set song name and add padding if playing
-            binding.textViewSongName.text = song.name
-            binding.textViewSongName.setPadding(if (playing) 40 else 0, 0, 0, 0)
 
-            // Show icon only if playing
-            binding.imageViewIcon.visibility = if (playing) View.VISIBLE else View.GONE
+            binding.textViewSongName.text = song.name
+
+
+            binding.imageViewIcon.visibility = if (playing) View.VISIBLE else View.INVISIBLE
             if (playing) {
                 binding.imageViewIcon.setImageResource(R.drawable.group)
             }
 
-            // Show Now Playing label
-            binding.textViewNowPlaying.text = if (playing) "Now Playing" else ""
-            binding.textViewNowPlaying.visibility = if (playing) View.VISIBLE else View.GONE
 
-            // Set play/pause icon
             val playIcon = if (playing) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
             binding.buttonPlay.setImageResource(playIcon)
 
-            // Highlight the card and root background when playing
-            val cardColor = if (playing) Color.parseColor("#2196F3") else Color.WHITE
-            binding.cardViewItem.setCardBackgroundColor(cardColor)
-            binding.root.setBackgroundColor(cardColor)
 
-            // Button click listener
+            val cardColor = if (playing)
+                ContextCompat.getColor(context, R.color.blue)
+            else
+                ContextCompat.getColor(context, R.color.white)
+
+            binding.cardViewItem.setCardBackgroundColor(cardColor)
+
+
             binding.buttonPlay.setOnClickListener {
                 onSongClick(song, position)
             }
@@ -62,5 +61,8 @@ class SongAdapter(
 
     override fun getItemCount(): Int = songs.size
 }
+
+
+
 
 
