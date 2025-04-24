@@ -25,24 +25,24 @@ class SongAdapter(
 
             binding.textViewSongName.text = song.name
 
-            // Show group icon if playing
+
             binding.imageViewIcon.visibility = if (playing) View.VISIBLE else View.INVISIBLE
             if (playing) {
                 binding.imageViewIcon.setImageResource(R.drawable.group)
             }
 
-            // Toggle play/pause icon
+
             val playIcon = if (playing) R.drawable.pause else R.drawable.play
             binding.buttonPlay.setImageResource(playIcon)
 
-            // Highlight the card
+
             val cardColor = if (playing)
                 Color.parseColor("#43CCF8")
             else
                 ContextCompat.getColor(context, R.color.white)
             binding.cardViewItem.setCardBackgroundColor(cardColor)
 
-            // Click listener
+
             binding.buttonPlay.setOnClickListener {
                 onSongClick(song, position)
             }
