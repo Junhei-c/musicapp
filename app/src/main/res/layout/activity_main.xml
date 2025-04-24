@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
+            android:background="@color/colorPrimaryVariant"
             android:title="@string/toolbar_title"
             android:titleTextColor="@color/white"
             app:layout_constraintTop_toTopOf="parent"
@@ -46,10 +46,8 @@
                     android:textColor="@color/black"
                     android:textSize="@dimen/song_title_size"
                     android:textStyle="bold"
-                    android:paddingStart="@dimen/now_playing_title_padding_start"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
-
 
                 <ImageView
                     android:id="@+id/imageViewNowPlayingIcon"
@@ -62,17 +60,17 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
-
                 <ImageButton
                     android:id="@+id/buttonPlayPause"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:src="@android:drawable/ic_media_play"
+                    android:src="@drawable/play"
                     android:contentDescription="@string/play_pause_button_desc"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
+
+
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -91,6 +89,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
+
 
 
 

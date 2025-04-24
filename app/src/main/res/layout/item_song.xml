@@ -13,18 +13,19 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:cardBackgroundColor="#FFFFFF">
+        app:cardElevation="4dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp">
+            android:padding="16dp">
 
             <ImageView
                 android:id="@+id/imageViewIcon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:visibility="invisible"
+                android:src="@drawable/group"
                 android:contentDescription="@string/song_icon"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -32,36 +33,24 @@
 
             <TextView
                 android:id="@+id/textViewSongName"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/default_title"
-                android:textColor="#0000FF"
-                android:textStyle="bold"
+                android:text="Song Title"
+                android:textColor="@color/black"
                 android:textSize="16sp"
+                android:textStyle="bold"
                 android:layout_marginStart="12dp"
                 app:layout_constraintStart_toEndOf="@id/imageViewIcon"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <TextView
-                android:id="@+id/textViewNowPlaying"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#2196F3"
-                android:textSize="14sp"
-                android:layout_marginEnd="8dp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toStartOf="@id/buttonPlay"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/buttonPlay" />
 
             <ImageButton
                 android:id="@+id/buttonPlay"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@android:color/transparent"
-                android:src="@android:drawable/ic_media_play"
+                android:src="@drawable/play"
                 android:contentDescription="@string/play_pause_button_desc"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

@@ -1,5 +1,6 @@
 package com.example.android.musicapp2.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,28 +23,26 @@ class SongAdapter(
             val context = binding.root.context
             val playing = isItemPlaying(position)
 
-
             binding.textViewSongName.text = song.name
 
-
+            // Show group icon if playing
             binding.imageViewIcon.visibility = if (playing) View.VISIBLE else View.INVISIBLE
             if (playing) {
                 binding.imageViewIcon.setImageResource(R.drawable.group)
             }
 
-
-            val playIcon = if (playing) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+            // Toggle play/pause icon
+            val playIcon = if (playing) R.drawable.pause else R.drawable.play
             binding.buttonPlay.setImageResource(playIcon)
 
-
+            // Highlight the card
             val cardColor = if (playing)
-                ContextCompat.getColor(context, R.color.blue)
+                Color.parseColor("#43CCF8")
             else
                 ContextCompat.getColor(context, R.color.white)
-
             binding.cardViewItem.setCardBackgroundColor(cardColor)
 
-
+            // Click listener
             binding.buttonPlay.setOnClickListener {
                 onSongClick(song, position)
             }
@@ -61,6 +60,7 @@ class SongAdapter(
 
     override fun getItemCount(): Int = songs.size
 }
+
 
 
 

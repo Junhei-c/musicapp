@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Padding and Spacing -->
+    <!-- Spacing & Padding -->
     <dimen name="activity_padding">16dp</dimen>
     <dimen name="content_padding">16dp</dimen>
     <dimen name="spacing_small">8dp</dimen>
@@ -13,14 +13,16 @@
     <dimen name="song_title_size">18sp</dimen>
     <dimen name="text_normal_size">14sp</dimen>
 
-    <!-- Now Playing Section -->
-    <dimen name="now_playing_height">200dp</dimen>
-    <dimen name="image_size">90dp</dimen>
-    <dimen name="play_pause_button_size">dp</dimen>
+    <!-- Component Sizes -->
+    <dimen name="now_playing_height">280dp</dimen>
+    <dimen name="image_size">130dp</dimen> <!-- updated for bigger image -->
+    <dimen name="play_pause_button_size">48dp</dimen>
 
     <!-- CardView Styling -->
     <dimen name="card_corner_radius">8dp</dimen>
     <dimen name="card_elevation">4dp</dimen>
 
 </resources>
+
+
 

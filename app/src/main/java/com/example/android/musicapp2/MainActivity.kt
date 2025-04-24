@@ -31,20 +31,20 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up toolbar and status bar
+
         setSupportActionBar(binding.toolbar)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
-        // Set up song list RecyclerView
+
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
-        // Observe data from ViewModel
+
         viewModel.data.observe(this) { songList ->
             setupPlayer(songList)
             setupAdapter(songList)
         }
 
-        // Handle Now Playing card play/pause button
+
         binding.buttonPlayPause.setOnClickListener {
             if (currentIndex == -1) return@setOnClickListener
             playerManager.togglePlayback(currentIndex)
