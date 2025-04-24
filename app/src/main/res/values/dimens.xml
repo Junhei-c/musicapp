@@ -10,12 +10,12 @@
     <dimen name="now_playing_title_padding_start">80dp</dimen>
 
     <!-- Text Sizes -->
-    <dimen name="song_title_size">18sp</dimen>
-    <dimen name="text_normal_size">14sp</dimen>
+    <dimen name="song_title_size">25sp</dimen>
+    <dimen name="text_normal_size">20sp</dimen>
 
     <!-- Component Sizes -->
     <dimen name="now_playing_height">280dp</dimen>
-    <dimen name="image_size">130dp</dimen> <!-- updated for bigger image -->
+    <dimen name="image_size">200dp</dimen> <!-- updated for bigger image -->
     <dimen name="play_pause_button_size">48dp</dimen>
 
     <!-- CardView Styling -->
