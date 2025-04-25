@@ -31,24 +31,21 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         setSupportActionBar(binding.toolbar)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
-
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
-
 
         viewModel.data.observe(this) { songList ->
             setupPlayer(songList)
             setupAdapter(songList)
         }
 
-
         binding.buttonPlayPause.setOnClickListener {
-            if (currentIndex == -1) return@setOnClickListener
-            playerManager.togglePlayback(currentIndex)
-            updateNowPlaying()
+            if (currentIndex != -1) {
+                playerManager.togglePlayback(currentIndex)
+                updateNowPlaying()
+            }
         }
     }
 
@@ -98,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
 
 
 
