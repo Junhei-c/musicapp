@@ -24,13 +24,13 @@
     <dimen name="card_elevation">4dp</dimen>
 
     <!-- Widget Dimensions -->
-    <dimen name="widget_height">120dp</dimen>
-    <dimen name="widget_margin">8dp</dimen>
+    <dimen name="widget_height">140dp</dimen>
+    <dimen name="widget_margin">10dp</dimen>
     <dimen name="widget_padding">4dp</dimen>
     <dimen name="widget_albumart_size">24dp</dimen>
     <dimen name="widget_text_margin_start">8dp</dimen>
-    <dimen name="widget_song_title_size">11sp</dimen>
-    <dimen name="widget_artist_text_size">9sp</dimen>
+    <dimen name="widget_song_title_size">20sp</dimen>
+    <dimen name="widget_artist_text_size">20sp</dimen>
     <dimen name="widget_control_button_small">20dp</dimen>
     <dimen name="widget_control_button_medium">12dp</dimen>
     <dimen name="widget_corner_radius">16dp</dimen>
