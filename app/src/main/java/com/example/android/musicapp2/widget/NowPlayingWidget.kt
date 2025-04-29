@@ -30,7 +30,7 @@ class NowPlayingWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        // Here you can integrate with PlayerManager if needed
+
     }
 
     private fun getPendingIntent(context: Context, action: String): PendingIntent {
