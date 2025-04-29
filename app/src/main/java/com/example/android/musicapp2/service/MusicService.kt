@@ -3,7 +3,6 @@ package com.example.android.musicapp2.service
 import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.example.android.musicapp2.utils.PlayerManager
@@ -60,12 +59,14 @@ class MusicService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun preloadPlaylist() {
-        val prefs = getSharedPreferences("player_prefs", Context.MODE_PRIVATE)
-        val urls = prefs.getStringSet("playlist", emptySet())?.toList() ?: emptyList()
-        if (urls.isNotEmpty()) {
-            playerManager.setPlaylist(urls)
-        }
+        val urls = listOf(
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+        )
+        playerManager.setPlaylist(urls)
     }
+
 
     private fun refreshWidget() {
         val ids = AppWidgetManager.getInstance(this)
