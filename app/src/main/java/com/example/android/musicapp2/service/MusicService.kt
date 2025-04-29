@@ -5,6 +5,9 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.IBinder
+import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
+import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.utils.PlayerStateManager
 import com.example.android.musicapp2.widget.NowPlayingWidget
@@ -18,6 +21,7 @@ class MusicService : Service() {
         super.onCreate()
         playerManager = PlayerManager(this)
         preloadPlaylist()
+        startForegroundNotification()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -49,10 +53,10 @@ class MusicService : Service() {
                     PlayerStateManager.setPlaying(this, true)
                 }
             }
+
         }
 
-        refreshWidget()
-
+        updateWidgetSongInfo()
         return START_STICKY
     }
 
@@ -67,15 +71,40 @@ class MusicService : Service() {
         playerManager.setPlaylist(urls)
     }
 
+    private fun updateWidgetSongInfo() {
+        val currentItem = playerManager.getCurrentMediaItem() ?: return
+        val title = currentItem.mediaMetadata.title?.toString() ?: "Unknown"
+        val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown"
 
-    private fun refreshWidget() {
-        val ids = AppWidgetManager.getInstance(this)
-            .getAppWidgetIds(ComponentName(this, NowPlayingWidget::class.java))
-        val intent = Intent(this, NowPlayingWidget::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        val views = RemoteViews(packageName, R.layout.widget_now_playing)
+        views.setTextViewText(R.id.widgetSongTitle, title)
+        views.setTextViewText(R.id.widgetArtist, artist)
+
+        val widgetManager = AppWidgetManager.getInstance(this)
+        val widgetIds = widgetManager.getAppWidgetIds(ComponentName(this, NowPlayingWidget::class.java))
+        widgetManager.updateAppWidget(widgetIds, views)
+    }
+
+    private fun startForegroundNotification() {
+        val channelId = "music_player_channel"
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                channelId,
+                "Music Player",
+                android.app.NotificationManager.IMPORTANCE_LOW
+            )
+            val manager = getSystemService(android.app.NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
         }
-        sendBroadcast(intent)
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Music Player")
+            .setContentText("Playing music...")
+            .setSmallIcon(R.drawable.group)
+            .build()
+
+        startForeground(1, notification)
     }
 }
 
