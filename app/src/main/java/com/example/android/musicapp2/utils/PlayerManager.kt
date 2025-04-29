@@ -38,12 +38,25 @@ class PlayerManager(private val context: Context) {
         play(prevIndex)
     }
 
+    fun getPlaylistSize(): Int {
+        return playlist.size
+    }
+
+
 
     fun setPlaylist(urls: List<String>) {
         playlist = urls
         player.setMediaItems(urls.map { MediaItem.fromUri(it) })
         player.prepare()
+
+        savePlaylistToPrefs(urls)
     }
+
+    private fun savePlaylistToPrefs(urls: List<String>) {
+        val prefs = context.getSharedPreferences("player_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putStringSet("playlist", urls.toSet()).apply()
+    }
+
 
     fun play(index: Int) {
         currentIndex = index
@@ -54,6 +67,8 @@ class PlayerManager(private val context: Context) {
     fun pause() {
         player.playWhenReady = false
     }
+
+
 
     fun togglePlayback(index: Int) {
         if (currentIndex == index && player.isPlaying) {

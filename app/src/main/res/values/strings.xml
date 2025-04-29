@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- App Labels -->
+
     <string name="app_name">MusicApp</string>
     <string name="toolbar_title">Music App</string>
 
-    <!-- General Descriptions -->
+
     <string name="song_icon">Song icon</string>
     <string name="now_playing_icon">Now playing icon</string>
     <string name="play_pause_button_desc">Play or pause the current song</string>
 
-    <!-- Now Playing Defaults -->
+
     <string name="default_title">No Title</string>
 
-    <!-- Widget Content -->
+
     <string name="widget_song_title">Yellow</string>
     <string name="widget_artist">Cold Play</string>
     <string name="widget_prev_desc">Previous</string>

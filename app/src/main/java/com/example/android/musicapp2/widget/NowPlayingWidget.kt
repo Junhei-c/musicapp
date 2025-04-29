@@ -7,59 +7,41 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
-import com.example.android.musicapp2.utils.PlayerManager
+import com.example.android.musicapp2.utils.PlayerStateManager
 
 class NowPlayingWidget : AppWidgetProvider() {
 
-    companion object {
-        const val ACTION_PLAY_PAUSE = "com.example.android.musicapp2.ACTION_PLAY_PAUSE"
-        const val ACTION_NEXT = "com.example.android.musicapp2.ACTION_NEXT"
-        const val ACTION_PREV = "com.example.android.musicapp2.ACTION_PREV"
-
-        private var playerManager: PlayerManager? = null
-    }
-
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        playerManager = PlayerManager(context.applicationContext)
-
-        for (widgetId in appWidgetIds) {
+        for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_now_playing)
 
-            views.setOnClickPendingIntent(R.id.widgetPlay, getPendingIntent(context, ACTION_PLAY_PAUSE))
-            views.setOnClickPendingIntent(R.id.widgetNext, getPendingIntent(context, ACTION_NEXT))
-            views.setOnClickPendingIntent(R.id.widgetPrev, getPendingIntent(context, ACTION_PREV))
+            val isPlaying = PlayerStateManager.isPlaying(context)
 
-            appWidgetManager.updateAppWidget(widgetId, views)
-        }
-    }
+            val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
+            views.setImageViewResource(R.id.widgetPlay, playIcon)
 
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
+            views.setOnClickPendingIntent(R.id.widgetPlay, getPendingIntent(context, WidgetReceiver.ACTION_PLAY))
+            views.setOnClickPendingIntent(R.id.widgetNext, getPendingIntent(context, WidgetReceiver.ACTION_NEXT))
+            views.setOnClickPendingIntent(R.id.widgetPrev, getPendingIntent(context, WidgetReceiver.ACTION_PREV))
 
-        if (playerManager == null) {
-            playerManager = PlayerManager(context.applicationContext)
-        }
-
-        when (intent.action) {
-            ACTION_PLAY_PAUSE -> {
-                if (playerManager!!.isPlaying()) {
-                    playerManager!!.pause()
-                } else {
-                    playerManager!!.play(playerManager!!.currentIndex.takeIf { it != -1 } ?: 0)
-                }
-            }
-            ACTION_NEXT -> {
-                playerManager!!.playNext()
-            }
-            ACTION_PREV -> {
-                playerManager!!.playPrevious()
-            }
+            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 
     private fun getPendingIntent(context: Context, action: String): PendingIntent {
-        val intent = Intent(context, NowPlayingWidget::class.java).apply { this.action = action }
-        return PendingIntent.getBroadcast(context, action.hashCode(), intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val intent = Intent(context, WidgetReceiver::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            action.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 }
+
+
+
+
 

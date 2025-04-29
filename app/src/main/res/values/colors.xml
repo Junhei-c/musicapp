@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Material Theme Colors -->
+
     <color name="colorPrimary">#43CCF8</color>
     <color name="colorPrimaryVariant">#2F88FF</color>
     <color name="colorOnPrimary">#FFFFFF</color>
@@ -10,20 +10,22 @@
     <color name="colorSecondaryVariant">#018786</color>
     <color name="colorOnSecondary">#000000</color>
 
-    <!-- Surface & Backgrounds -->
+
     <color name="colorBackground">#FFFFFF</color>
     <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnBackground">#000000</color>
     <color name="colorOnSurface">#000000</color>
+    <color name="iconBlueColorAndDark">#2196F3</color>
 
-    <!-- Utility Colors -->
+
+
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="blue">#2196F3</color>
     <color name="yellow">#FFF982</color>
 
 
-    <!-- Widget Background -->
+
     <color name="widget_background">#121212</color>
 
 </resources>
