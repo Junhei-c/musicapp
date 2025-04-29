@@ -26,6 +26,18 @@ class PlayerManager(private val context: Context) {
             }
         })
     }
+    fun playNext() {
+        if (playlist.isEmpty()) return
+        val nextIndex = (currentIndex + 1) % playlist.size
+        play(nextIndex)
+    }
+
+    fun playPrevious() {
+        if (playlist.isEmpty()) return
+        val prevIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+        play(prevIndex)
+    }
+
 
     fun setPlaylist(urls: List<String>) {
         playlist = urls

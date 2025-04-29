@@ -1,39 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- General App Dimensions -->
     <dimen name="activity_padding">16dp</dimen>
     <dimen name="content_padding">16dp</dimen>
     <dimen name="spacing_small">8dp</dimen>
     <dimen name="spacing_medium">16dp</dimen>
 
-    <!-- Toolbar Title Alignment -->
+
     <dimen name="toolbar_title_padding">80dp</dimen>
     <dimen name="now_playing_title_padding_start">80dp</dimen>
 
-    <!-- Song Page Dimensions -->
-    <dimen name="song_title_size">25sp</dimen>
-    <dimen name="text_normal_size">20sp</dimen>
-    <dimen name="now_playing_height">280dp</dimen>
-    <dimen name="image_size">200dp</dimen>
-    <dimen name="play_pause_button_size">48dp</dimen>
 
-    <!-- Widget Specific Dimensions -->
-    <dimen name="widget_height">200dp</dimen>
+    <dimen name="now_playing_height">280dp</dimen>
+    <dimen name="card_corner_radius">8dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="image_size">90dp</dimen>
+
+
+    <dimen name="song_title_size">18sp</dimen>
+    <dimen name="text_normal_size">14sp</dimen>
+
+
+    <dimen name="widget_height">160dp</dimen>
     <dimen name="widget_margin">12dp</dimen>
     <dimen name="widget_padding">12dp</dimen>
     <dimen name="widget_albumart_size">64dp</dimen>
+    <dimen name="widget_song_title_size">16sp</dimen>
+    <dimen name="widget_artist_text_size">14sp</dimen>
+    <dimen name="widget_albumart_margin">12dp</dimen>
+    <dimen name="widget_albumart_margin_top">12dp</dimen>
     <dimen name="widget_text_margin_start">12dp</dimen>
-    <dimen name="widget_song_title_size">18sp</dimen>
-    <dimen name="widget_artist_text_size">15sp</dimen>
-
-    <!-- CardView Defaults -->
-    <dimen name="card_corner_radius">16dp</dimen>
-    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="widget_text_margin_top">8dp</dimen>
+    <dimen name="widget_artist_margin_top">4dp</dimen>
+    <dimen name="widget_controls_margin_bottom">12dp</dimen>
+    <dimen name="widget_control_spacing">12dp</dimen>
+    <dimen name="widget_control_button_size">48dp</dimen>
 
 </resources>
-
-
 
 
 
