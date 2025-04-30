@@ -30,33 +30,13 @@ class MusicService : Service() {
         }
 
         when (intent?.action) {
-            WidgetReceiver.ACTION_PLAY -> {
-                if (playerManager.getPlaylistSize() > 0) {
-                    if (playerManager.isPlaying()) {
-                        playerManager.pause()
-                        PlayerStateManager.setPlaying(this, false)
-                    } else {
-                        playerManager.play(playerManager.currentIndex.takeIf { it >= 0 } ?: 0)
-                        PlayerStateManager.setPlaying(this, true)
-                    }
-                }
-            }
-            WidgetReceiver.ACTION_NEXT -> {
-                if (playerManager.getPlaylistSize() > 0) {
-                    playerManager.playNext()
-                    PlayerStateManager.setPlaying(this, true)
-                }
-            }
-            WidgetReceiver.ACTION_PREV -> {
-                if (playerManager.getPlaylistSize() > 0) {
-                    playerManager.playPrevious()
-                    PlayerStateManager.setPlaying(this, true)
-                }
-            }
-
+            WidgetReceiver.ACTION_PLAY -> togglePlayPause()
+            WidgetReceiver.ACTION_NEXT -> playNext()
+            WidgetReceiver.ACTION_PREV -> playPrevious()
         }
 
         updateWidgetSongInfo()
+        refreshWidget()
         return START_STICKY
     }
 
@@ -71,18 +51,55 @@ class MusicService : Service() {
         playerManager.setPlaylist(urls)
     }
 
+    private fun togglePlayPause() {
+        if (playerManager.getPlaylistSize() > 0) {
+            if (playerManager.isPlaying()) {
+                playerManager.pause()
+                PlayerStateManager.setPlaying(this, false)
+            } else {
+                playerManager.play(playerManager.currentIndex.takeIf { it >= 0 } ?: 0)
+                PlayerStateManager.setPlaying(this, true)
+            }
+        }
+    }
+
+    private fun playNext() {
+        if (playerManager.getPlaylistSize() > 0) {
+            playerManager.playNext()
+            PlayerStateManager.setPlaying(this, true)
+        }
+    }
+
+    private fun playPrevious() {
+        if (playerManager.getPlaylistSize() > 0) {
+            playerManager.playPrevious()
+            PlayerStateManager.setPlaying(this, true)
+        }
+    }
+
     private fun updateWidgetSongInfo() {
         val currentItem = playerManager.getCurrentMediaItem() ?: return
         val title = currentItem.mediaMetadata.title?.toString() ?: "Unknown"
         val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown"
 
-        val views = RemoteViews(packageName, R.layout.widget_now_playing)
-        views.setTextViewText(R.id.widgetSongTitle, title)
-        views.setTextViewText(R.id.widgetArtist, artist)
+        val views = RemoteViews(packageName, R.layout.widget_now_playing).apply {
+            setTextViewText(R.id.widgetSongTitle, title)
+            setTextViewText(R.id.widgetArtist, artist)
+        }
 
         val widgetManager = AppWidgetManager.getInstance(this)
         val widgetIds = widgetManager.getAppWidgetIds(ComponentName(this, NowPlayingWidget::class.java))
         widgetManager.updateAppWidget(widgetIds, views)
+    }
+
+    private fun refreshWidget() {
+        val intent = Intent(this, NowPlayingWidget::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        }
+        val widgetManager = AppWidgetManager.getInstance(this)
+        val widgetIds = widgetManager.getAppWidgetIds(ComponentName(this, NowPlayingWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+        sendBroadcast(intent)
     }
 
     private fun startForegroundNotification() {
@@ -107,5 +124,6 @@ class MusicService : Service() {
         startForeground(1, notification)
     }
 }
+
 
 
