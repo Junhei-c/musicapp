@@ -20,63 +20,70 @@ class MyMusicWidget : AppWidgetProvider() {
         const val ACTION_LIKE = "com.example.android.musicapp2.ACTION_LIKE"
     }
 
-    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
-        for (id in ids) updateWidget(context, manager, id)
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        for (widgetId in appWidgetIds) {
+            updateWidget(context, appWidgetManager, widgetId)
+        }
     }
 
-    override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
-        updateWidget(context, manager, id)
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        updateWidget(context, appWidgetManager, appWidgetId)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        val serviceIntent = Intent(context, MusicService::class.java).apply {
-            action = intent.action
+        intent.action?.let { action ->
+            val serviceIntent = Intent(context, MusicService::class.java).apply {
+                this.action = action
+            }
+            context.startService(serviceIntent)
         }
-        context.startService(serviceIntent)
     }
 
-    private fun updateWidget(context: Context, manager: AppWidgetManager, id: Int) {
-        val options = manager.getAppWidgetOptions(id)
+    private fun updateWidget(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        widgetId: Int
+    ) {
+        val options = appWidgetManager.getAppWidgetOptions(widgetId)
         val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-        val layout = if (minHeight >= 150) R.layout.widget_expanded else R.layout.widget_now_playing
+        val layoutRes = if (minHeight >= 150) R.layout.widget_expanded else R.layout.widget_now_playing
 
         val data = DataRepository().getData().firstOrNull()
-        val views = RemoteViews(context.packageName, layout)
-
+        val views = RemoteViews(context.packageName, layoutRes)
 
         data?.let {
             views.setTextViewText(R.id.widgetSongTitle, it.name)
             views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
         }
 
+        views.setOnClickPendingIntent(R.id.widgetPlay, getPendingIntent(context, ACTION_PLAY_PAUSE))
+        views.setOnClickPendingIntent(R.id.widgetNext, getPendingIntent(context, ACTION_NEXT))
+        views.setOnClickPendingIntent(R.id.widgetPrev, getPendingIntent(context, ACTION_PREV))
+        views.setOnClickPendingIntent(R.id.heart, getPendingIntent(context, ACTION_LIKE))
 
-        views.setOnClickPendingIntent(
-            R.id.widgetPlay,
-            getPendingIntent(context, ACTION_PLAY_PAUSE)
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widgetNext,
-            getPendingIntent(context, ACTION_NEXT)
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widgetPrev,
-            getPendingIntent(context, ACTION_PREV)
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.heart,
-            getPendingIntent(context, ACTION_LIKE)
-        )
-
-        manager.updateAppWidget(id, views)
+        appWidgetManager.updateAppWidget(widgetId, views)
     }
 
     private fun getPendingIntent(context: Context, action: String): PendingIntent {
-        val intent = Intent(context, MyMusicWidget::class.java).apply { this.action = action }
-        return PendingIntent.getBroadcast(context, action.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val intent = Intent(context, MyMusicWidget::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            action.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 }
 

@@ -29,26 +29,28 @@
             android:name=".service.MusicService"
             android:exported="false" />
 
-
         <receiver
             android:name=".widget.MyMusicWidget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.example.android.musicapp2.ACTION_PLAY_PAUSE" />
+                <action android:name="com.example.android.musicapp2.ACTION_NEXT" />
+                <action android:name="com.example.android.musicapp2.ACTION_PREV" />
+                <action android:name="com.example.android.musicapp2.ACTION_LIKE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/now_playing_widget_info" />
         </receiver>
 
-
         <receiver
             android:name=".widget.WidgetReceiver"
             android:exported="true" />
-
     </application>
 
 </manifest>
+
 
 
 
