@@ -19,6 +19,7 @@
 
     <dimen name="song_title_size">18sp</dimen>
     <dimen name="text_normal_size">14sp</dimen>
+    <dimen name="progress_height">6dp</dimen>
 
 
     <dimen name="widget_height">160dp</dimen>
@@ -35,6 +36,30 @@
     <dimen name="widget_controls_margin_bottom">12dp</dimen>
     <dimen name="widget_control_spacing">12dp</dimen>
     <dimen name="widget_control_button_size">48dp</dimen>
+
+
+        <dimen name="widget_margin_small">8dp</dimen>
+
+        <dimen name="art_size">40dp</dimen>
+        <dimen name="icon_small">24dp</dimen>
+        <dimen name="icon_medium">36dp</dimen>
+        <dimen name="icon_large">48dp</dimen>
+        <dimen name="mode_icon_size">48dp</dimen>
+
+        <dimen name="text_title_size">16sp</dimen>
+
+
+        <dimen name="widget_padding_large">24dp</dimen>
+        <dimen name="widget_margin_large">24dp</dimen>
+        <dimen name="widget_margin_medium">16dp</dimen>
+
+        <dimen name="art_size_large">72dp</dimen>
+        <dimen name="icon_size_large">36dp</dimen>
+        <dimen name="text_title_size_large">22sp</dimen>
+
+
+
+
 
 </resources>
 

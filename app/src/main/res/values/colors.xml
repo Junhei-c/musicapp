@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-
-    <color name="colorPrimary">#43CCF8</color>
-    <color name="colorPrimaryVariant">#2F88FF</color>
-    <color name="colorOnPrimary">#FFFFFF</color>
-
-    <color name="colorSecondary">#03DAC6</color>
-    <color name="colorSecondaryVariant">#018786</color>
-    <color name="colorOnSecondary">#000000</color>
-
-
-    <color name="colorBackground">#FFFFFF</color>
-    <color name="colorSurface">#FFFFFF</color>
-    <color name="colorOnBackground">#000000</color>
-    <color name="colorOnSurface">#000000</color>
-    <color name="iconBlueColorAndDark">#2196F3</color>
-
-
-
+    <color name="color_primary">#43CCF8</color>
+    <color name="color_primary_variant">#2F88FF</color>
+    <color name="color_on_primary">#FFFFFF</color>
+    <color name="color_secondary">#03DAC6</color>
+    <color name="color_secondary_variant">#018786</color>
+    <color name="color_on_secondary">#000000</color>
+    <color name="color_background">#FFFFFF</color>
+    <color name="color_surface">#FFFFFF</color>
+    <color name="color_on_background">#000000</color>
+    <color name="color_on_surface">#000000</color>
+    <color name="widget_background">#121212</color>
+    <color name="widget_icon_blue">#2196F3</color>
+    <color name="widget_highlight">#FFF982</color>
+    <color name="widget_light_gray">#D3D3D3</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="blue">#2196F3</color>
-    <color name="yellow">#FFF982</color>
-
-
-
-    <color name="widget_background">#121212</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="colorPrimary">@color/color_primary</color>
+    <color name="colorPrimaryVariant">@color/color_primary_variant</color>
+    <color name="colorSecondary">@color/color_secondary</color>
+    <color name="colorSecondaryVariant">@color/color_secondary_variant</color>
+    <color name="colorOnPrimary">@color/color_on_primary</color>
+    <color name="colorOnSecondary">@color/color_on_secondary</color>
+    <color name="colorOnBackground">@color/color_on_background</color>
+    <color name="colorOnSurface">@color/color_on_surface</color>
+    <color name="colorBackground">@color/color_background</color>
+    <color name="colorSurface">@color/color_surface</color>
 
 </resources>
+
