@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.example.android.musicapp2.R
+import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.utils.PlayerStateManager
 import com.example.android.musicapp2.widget.NowPlayingWidget
@@ -43,12 +44,8 @@ class MusicService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun preloadPlaylist() {
-        val urls = listOf(
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-        )
-        playerManager.setPlaylist(urls)
+        val data = DataRepository().getData()
+        playerManager.setPlaylist(data)
     }
 
     private fun togglePlayPause() {
@@ -78,13 +75,12 @@ class MusicService : Service() {
     }
 
     private fun updateWidgetSongInfo() {
-        val currentItem = playerManager.getCurrentMediaItem() ?: return
-        val title = currentItem.mediaMetadata.title?.toString() ?: "Unknown"
-        val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown"
+        val currentData = playerManager.getCurrentData() ?: return
 
         val views = RemoteViews(packageName, R.layout.widget_now_playing).apply {
-            setTextViewText(R.id.widgetSongTitle, title)
-            setTextViewText(R.id.widgetArtist, artist)
+            setTextViewText(R.id.widgetSongTitle, currentData.name)
+            setTextViewText(R.id.widgetArtist, "Unknown Artist")
+            setImageViewResource(R.id.widgetAlbumArt, currentData.imageRes)
         }
 
         val widgetManager = AppWidgetManager.getInstance(this)

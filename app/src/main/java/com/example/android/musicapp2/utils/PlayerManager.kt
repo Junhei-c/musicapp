@@ -5,11 +5,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.android.musicapp2.model.DataModel
 
 class PlayerManager(private val context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
-    private var playlist: List<String> = emptyList()
+    private var playlist: List<DataModel> = emptyList()
     var currentIndex: Int = -1
         private set
 
@@ -28,27 +29,22 @@ class PlayerManager(private val context: Context) {
         })
     }
 
-    fun setPlaylist(urls: List<String>) {
-        playlist = urls
-        player.setMediaItems(urls.mapIndexed { index, url ->
+    fun setPlaylist(data: List<DataModel>) {
+        playlist = data
+        player.setMediaItems(data.map {
             MediaItem.Builder()
-                .setUri(url)
+                .setUri(it.url)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setTitle("Track ${index + 1}")
-                        .setArtist("Artist ${index + 1}")
+                        .setTitle(it.name)
+                        .setArtist("Unknown Artist")
                         .build()
-                )
-                .build()
+                ).build()
         })
         player.prepare()
-        savePlaylistToPrefs(urls)
     }
 
-    private fun savePlaylistToPrefs(urls: List<String>) {
-        val prefs = context.getSharedPreferences("player_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putStringSet("playlist", urls.toSet()).apply()
-    }
+    fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
 
     fun play(index: Int) {
         if (playlist.isEmpty()) return
@@ -95,7 +91,6 @@ class PlayerManager(private val context: Context) {
         player.release()
     }
 }
-
 
 
 

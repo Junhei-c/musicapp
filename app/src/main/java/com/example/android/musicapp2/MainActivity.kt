@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var playerManager: PlayerManager
     private lateinit var adapter: SongAdapter
 
-    private var currentSong: DataModel? = null
     private var currentIndex: Int = -1
 
     private val viewModel: MainViewModel by viewModels {
@@ -51,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupPlayer(songList: List<DataModel>) {
         playerManager = PlayerManager(this).apply {
-            setPlaylist(songList.map { it.url })
+            setPlaylist(songList)
             setOnPlaybackChangedListener {
                 updateNowPlaying()
                 adapter.notifyDataSetChanged()
@@ -63,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         adapter = SongAdapter(
             songs = songList,
             onSongClick = { song, index ->
-                currentSong = song
                 currentIndex = index
                 playerManager.togglePlayback(index)
                 updateNowPlaying()
@@ -77,6 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateNowPlaying() {
         val isPlaying = playerManager.isPlaying()
+        val currentSong = playerManager.getCurrentData()
 
         binding.textViewCurrentTitle.text = currentSong?.name.orEmpty()
         binding.textViewCurrentTitle.setTextColor(ContextCompat.getColor(this, R.color.black))
@@ -95,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
 
 
 
