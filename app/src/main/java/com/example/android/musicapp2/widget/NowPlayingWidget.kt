@@ -26,7 +26,8 @@ class NowPlayingWidget : AppWidgetProvider() {
             AppWidgetManager.ACTION_APPWIDGET_UPDATE,
             WidgetReceiver.ACTION_PLAY,
             WidgetReceiver.ACTION_NEXT,
-            WidgetReceiver.ACTION_PREV -> {
+            WidgetReceiver.ACTION_PREV,
+            WidgetReceiver.ACTION_LIKE -> {
                 val appWidgetManager = AppWidgetManager.getInstance(context)
                 val componentName = ComponentName(context, NowPlayingWidget::class.java)
                 val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
@@ -49,12 +50,18 @@ class NowPlayingWidget : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.widget_now_playing)
 
         val isPlaying = PlayerStateManager.isPlaying(context)
+        val isLiked = PlayerStateManager.isLiked(context)
+
         val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
+        val heartIcon = if (isLiked) R.drawable.heart else R.drawable.whiteheart
+
         views.setImageViewResource(R.id.widgetPlay, playIcon)
+        views.setImageViewResource(R.id.heart, heartIcon)
 
         views.setOnClickPendingIntent(R.id.widgetPlay, getBroadcastPendingIntent(context, WidgetReceiver.ACTION_PLAY))
         views.setOnClickPendingIntent(R.id.widgetNext, getBroadcastPendingIntent(context, WidgetReceiver.ACTION_NEXT))
         views.setOnClickPendingIntent(R.id.widgetPrev, getBroadcastPendingIntent(context, WidgetReceiver.ACTION_PREV))
+        views.setOnClickPendingIntent(R.id.heart, getBroadcastPendingIntent(context, WidgetReceiver.ACTION_LIKE))
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
@@ -71,7 +78,6 @@ class NowPlayingWidget : AppWidgetProvider() {
         )
     }
 }
-
 
 
 

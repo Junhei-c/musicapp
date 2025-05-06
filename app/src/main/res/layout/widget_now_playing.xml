@@ -83,8 +83,20 @@
             android:background="@android:color/transparent"
             android:src="@drawable/next"
             android:contentDescription="@string/widget_next_desc" />
-
     </LinearLayout>
+
+
+    <ImageButton
+        android:id="@+id/heart"
+        android:layout_width="@dimen/widget_control_button_size"
+        android:layout_height="@dimen/widget_control_button_size"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/widget_albumart_margin_top"
+        android:layout_marginEnd="@dimen/widget_albumart_margin"
+        android:background="@android:color/transparent"
+        android:src="@drawable/heart"
+        android:contentDescription="@string/widget_next_desc" />
 
 </RelativeLayout>
 
