@@ -39,16 +39,6 @@ class MyMusicWidget : AppWidgetProvider() {
         updateWidget(context, appWidgetManager, appWidgetId)
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        intent.action?.let { action ->
-            val serviceIntent = Intent(context, MusicService::class.java).apply {
-                this.action = action
-            }
-            context.startService(serviceIntent)
-        }
-    }
-
     private fun updateWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -56,29 +46,39 @@ class MyMusicWidget : AppWidgetProvider() {
     ) {
         val options = appWidgetManager.getAppWidgetOptions(widgetId)
         val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-        val layoutRes = if (minHeight >= 150) R.layout.widget_expanded else R.layout.widget_now_playing
+        val isExpanded = minHeight >= 150
 
-        val data = DataRepository().getData().firstOrNull()
+        val layoutRes = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
         val views = RemoteViews(context.packageName, layoutRes)
+        val data = DataRepository().getData().firstOrNull()
 
         data?.let {
             views.setTextViewText(R.id.widgetSongTitle, it.name)
             views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
         }
 
-        views.setOnClickPendingIntent(R.id.widgetPlay, getPendingIntent(context, ACTION_PLAY_PAUSE))
-        views.setOnClickPendingIntent(R.id.widgetNext, getPendingIntent(context, ACTION_NEXT))
-        views.setOnClickPendingIntent(R.id.widgetPrev, getPendingIntent(context, ACTION_PREV))
-        views.setOnClickPendingIntent(R.id.heart, getPendingIntent(context, ACTION_LIKE))
+
+        if (isExpanded) {
+            views.setOnClickPendingIntent(R.id.btn_play_pause, getServicePendingIntent(context, ACTION_PLAY_PAUSE))
+            views.setOnClickPendingIntent(R.id.btn_next, getServicePendingIntent(context, ACTION_NEXT))
+            views.setOnClickPendingIntent(R.id.btn_prev, getServicePendingIntent(context, ACTION_PREV))
+            views.setOnClickPendingIntent(R.id.btn_fav, getServicePendingIntent(context, ACTION_LIKE))
+        } else {
+            views.setOnClickPendingIntent(R.id.widgetPlay, getServicePendingIntent(context, ACTION_PLAY_PAUSE))
+            views.setOnClickPendingIntent(R.id.widgetNext, getServicePendingIntent(context, ACTION_NEXT))
+            views.setOnClickPendingIntent(R.id.widgetPrev, getServicePendingIntent(context, ACTION_PREV))
+            views.setOnClickPendingIntent(R.id.heart, getServicePendingIntent(context, ACTION_LIKE))
+        }
 
         appWidgetManager.updateAppWidget(widgetId, views)
     }
 
-    private fun getPendingIntent(context: Context, action: String): PendingIntent {
-        val intent = Intent(context, MyMusicWidget::class.java).apply {
+
+    private fun getServicePendingIntent(context: Context, action: String): PendingIntent {
+        val intent = Intent(context, MusicService::class.java).apply {
             this.action = action
         }
-        return PendingIntent.getBroadcast(
+        return PendingIntent.getService(
             context,
             action.hashCode(),
             intent,
@@ -86,5 +86,6 @@ class MyMusicWidget : AppWidgetProvider() {
         )
     }
 }
+
 
 

@@ -7,7 +7,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.android.musicapp2.model.DataModel
 
-class PlayerManager(private val context: Context) {
+class PlayerManager private constructor(private val context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<DataModel> = emptyList()
@@ -89,6 +89,16 @@ class PlayerManager(private val context: Context) {
 
     fun release() {
         player.release()
+    }
+
+    companion object {
+        @Volatile private var instance: PlayerManager? = null
+
+        fun getInstance(context: Context): PlayerManager {
+            return instance ?: synchronized(this) {
+                instance ?: PlayerManager(context.applicationContext).also { instance = it }
+            }
+        }
     }
 }
 

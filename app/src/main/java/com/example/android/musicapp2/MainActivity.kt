@@ -31,13 +31,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black) // still works pre-SDK 34
 
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
-        viewModel.data.observe(this) { songList ->
-            setupPlayer(songList)
-            setupAdapter(songList)
+        viewModel.data.observe(this) { songs ->
+            setupPlayer(songs)
+            setupAdapter(songs)
         }
 
         binding.buttonPlayPause.setOnClickListener {
@@ -48,9 +48,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPlayer(songList: List<DataModel>) {
-        playerManager = PlayerManager(this).apply {
-            setPlaylist(songList)
+    private fun setupPlayer(songs: List<DataModel>) {
+        playerManager = PlayerManager.getInstance(this).apply {
+            setPlaylist(songs)
             setOnPlaybackChangedListener {
                 updateNowPlaying()
                 adapter.notifyDataSetChanged()
@@ -58,10 +58,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupAdapter(songList: List<DataModel>) {
+    private fun setupAdapter(songs: List<DataModel>) {
         adapter = SongAdapter(
-            songs = songList,
-            onSongClick = { song, index ->
+            songs = songs,
+            onSongClick = { _, index ->
                 currentIndex = index
                 playerManager.togglePlayback(index)
                 updateNowPlaying()
@@ -94,6 +94,9 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
+
+
 
 
 
