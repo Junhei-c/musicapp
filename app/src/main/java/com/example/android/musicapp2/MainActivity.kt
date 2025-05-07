@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black) // still works pre-SDK 34
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
 
 
 

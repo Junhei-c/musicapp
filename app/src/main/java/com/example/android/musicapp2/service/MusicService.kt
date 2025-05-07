@@ -1,39 +1,90 @@
 package com.example.android.musicapp2.service
 
 import android.app.Service
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
+import android.os.Handler
 import android.os.IBinder
-import com.example.android.musicapp2.widget.MyMusicWidget
+import android.os.Looper
+import android.widget.RemoteViews
+import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.PlayerManager
+import com.example.android.musicapp2.widget.MyMusicWidget
 
 class MusicService : Service() {
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val action = intent?.action ?: return START_NOT_STICKY
-        val player = PlayerManager.getInstance(applicationContext)
+    private lateinit var playerManager: PlayerManager
+    private val likedSongs = mutableSetOf<Int>()
 
-        when (action) {
-            MyMusicWidget.ACTION_PLAY_PAUSE -> {
-                if (player.isPlaying()) {
-                    player.pause()
-                } else {
-                    if (player.getPlaylistSize() == 0) {
-                        player.setPlaylist(com.example.android.musicapp2.repository.DataRepository().getData())
-                        player.play(0)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        playerManager = PlayerManager.getInstance(this)
+
+        when (intent?.action) {
+            MyMusicWidget.ACTION_PLAY_PAUSE -> playerManager.togglePlayback(playerManager.currentIndex)
+            MyMusicWidget.ACTION_NEXT -> playerManager.playNext()
+            MyMusicWidget.ACTION_PREV -> playerManager.playPrevious()
+            MyMusicWidget.ACTION_LIKE -> {
+                playerManager.getCurrentData()?.let {
+                    if (likedSongs.contains(it.id)) {
+                        likedSongs.remove(it.id)
                     } else {
-                        player.play(player.currentIndex.takeIf { it >= 0 } ?: 0)
+                        likedSongs.add(it.id)
                     }
                 }
             }
-
-            MyMusicWidget.ACTION_NEXT -> player.playNext()
-            MyMusicWidget.ACTION_PREV -> player.playPrevious()
-            MyMusicWidget.ACTION_LIKE -> {
-
-            }
         }
 
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            updateAllWidgets()
+        }, 200)
+
         return START_NOT_STICKY
+    }
+
+    private fun updateAllWidgets() {
+        val manager = AppWidgetManager.getInstance(this)
+        val component = ComponentName(this, MyMusicWidget::class.java)
+        val widgetIds = manager.getAppWidgetIds(component)
+
+        val data = playerManager.getCurrentData()
+        val isPlaying = playerManager.isPlaying()
+
+        for (id in widgetIds) {
+            val options = manager.getAppWidgetOptions(id)
+            val isExpanded = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
+            val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
+            val views = RemoteViews(packageName, layoutId)
+
+            data?.let {
+                views.setTextViewText(R.id.widgetSongTitle, it.name)
+                views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
+            }
+
+            val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
+            val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
+            views.setImageViewResource(playId, playIcon)
+            views.setOnClickPendingIntent(playId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PLAY_PAUSE))
+
+            views.setOnClickPendingIntent(
+                if (isExpanded) R.id.btn_next else R.id.widgetNext,
+                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_NEXT)
+            )
+
+            views.setOnClickPendingIntent(
+                if (isExpanded) R.id.btn_prev else R.id.widgetPrev,
+                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PREV)
+            )
+
+            val isLiked = data?.id?.let { likedSongs.contains(it) } ?: false
+            val likeIcon = if (isLiked) R.drawable.heart else R.drawable.whiteheart
+            val likeId = if (isExpanded) R.id.btn_fav else R.id.heart
+            views.setImageViewResource(likeId, likeIcon)
+            views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_LIKE))
+
+            manager.updateAppWidget(id, views)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

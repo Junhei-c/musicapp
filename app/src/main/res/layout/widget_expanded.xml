@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/widget_background"
-    android:padding="@dimen/widget_padding">
+    android:background="@drawable/bg_widget_card"
+    android:padding="12dp">
 
 
     <LinearLayout
@@ -13,62 +13,55 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="@dimen/widget_margin">
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:id="@+id/btn_fav"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/heart"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/btn_prev"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/prev"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/btn_play_pause"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/pausebt"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/btn_next"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/next"
+            android:layout_marginEnd="8dp" />
 
         <ImageView
             android:id="@+id/img_song_art"
-            android:layout_width="@dimen/art_size"
-            android:layout_height="@dimen/art_size"
-            android:layout_marginEnd="@dimen/widget_margin_small"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/group"
             android:scaleType="centerCrop"
-            android:background="@drawable/rounded_bg_gray"
-            android:src="@drawable/group" />
+            android:background="@drawable/bg_album_rounded"
+            android:layout_marginEnd="8dp" />
 
         <TextView
             android:id="@+id/txt_song_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:text="Now Playing"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
             android:maxLines="1"
-            android:ellipsize="end"
-            android:text="@string/widget_song_title"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_title_size" />
-
-        <ImageView
-            android:id="@+id/btn_fav"
-            android:layout_width="@dimen/icon_small"
-            android:layout_height="@dimen/icon_small"
-            android:src="@drawable/heart" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="@dimen/widget_margin_small">
-
-        <ImageView
-            android:id="@+id/btn_prev"
-            android:layout_width="@dimen/icon_medium"
-            android:layout_height="@dimen/icon_medium"
-            android:layout_marginEnd="@dimen/widget_margin_small"
-            android:src="@drawable/prev" />
-
-        <ImageView
-            android:id="@+id/btn_play_pause"
-            android:layout_width="@dimen/icon_large"
-            android:layout_height="@dimen/icon_large"
-            android:layout_marginEnd="@dimen/widget_margin_small"
-            android:src="@drawable/pausebt" />
-
-        <ImageView
-            android:id="@+id/btn_next"
-            android:layout_width="@dimen/icon_medium"
-            android:layout_height="@dimen/icon_medium"
-            android:src="@drawable/next" />
+            android:ellipsize="end" />
     </LinearLayout>
 
 
@@ -76,11 +69,11 @@
         android:id="@+id/music_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/progress_height"
+        android:layout_height="6dp"
         android:max="100"
         android:progress="40"
         android:progressDrawable="@drawable/progress_drawable"
-        android:layout_marginBottom="@dimen/widget_margin" />
+        android:layout_marginBottom="8dp" />
 
 
     <LinearLayout
@@ -91,26 +84,26 @@
 
         <ImageButton
             android:id="@+id/btn_mode1"
-            android:layout_width="@dimen/mode_icon_size"
-            android:layout_height="@dimen/mode_icon_size"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/earlybirds"
             android:background="@drawable/bg_mode_default"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:layout_marginEnd="8dp" />
 
         <ImageButton
             android:id="@+id/btn_mode2"
-            android:layout_width="@dimen/mode_icon_size"
-            android:layout_height="@dimen/mode_icon_size"
-            android:layout_marginStart="@dimen/widget_margin_small"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/chime"
             android:background="@drawable/bg_mode_default"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:layout_marginEnd="8dp" />
 
         <ImageButton
             android:id="@+id/btn_mode3"
-            android:layout_width="@dimen/mode_icon_size"
-            android:layout_height="@dimen/mode_icon_size"
-            android:layout_marginStart="@dimen/widget_margin_small"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/windchime"
             android:background="@drawable/bg_mode_selected"
             android:scaleType="centerInside" />
