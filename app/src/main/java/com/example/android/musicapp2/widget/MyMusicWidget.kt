@@ -18,6 +18,9 @@ class MyMusicWidget : AppWidgetProvider() {
         const val ACTION_NEXT = "com.example.android.musicapp2.ACTION_NEXT"
         const val ACTION_PREV = "com.example.android.musicapp2.ACTION_PREV"
         const val ACTION_LIKE = "com.example.android.musicapp2.ACTION_LIKE"
+        const val ACTION_MODE1 = "com.example.android.musicapp2.ACTION_MODE1"
+        const val ACTION_MODE2 = "com.example.android.musicapp2.ACTION_MODE2"
+        const val ACTION_MODE3 = "com.example.android.musicapp2.ACTION_MODE3"
 
         @JvmStatic
         fun getPendingIntent(context: Context, action: String): PendingIntent {
@@ -33,34 +36,18 @@ class MyMusicWidget : AppWidgetProvider() {
         }
     }
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        for (widgetId in appWidgetIds) {
-            updateWidget(context, appWidgetManager, widgetId)
-        }
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        for (id in ids) updateWidget(context, manager, id)
     }
 
-    override fun onAppWidgetOptionsChanged(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetId: Int,
-        newOptions: Bundle
-    ) {
-        updateWidget(context, appWidgetManager, appWidgetId)
+    override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, newOptions: Bundle) {
+        updateWidget(context, manager, id)
     }
 
-    private fun updateWidget(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        widgetId: Int
-    ) {
-        val options = appWidgetManager.getAppWidgetOptions(widgetId)
+    private fun updateWidget(context: Context, manager: AppWidgetManager, id: Int) {
+        val options = manager.getAppWidgetOptions(id)
         val isExpanded = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
         val layoutRes = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
-
         val views = RemoteViews(context.packageName, layoutRes)
         val song = DataRepository().getData().firstOrNull()
 
@@ -74,6 +61,10 @@ class MyMusicWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.btn_next, getPendingIntent(context, ACTION_NEXT))
             views.setOnClickPendingIntent(R.id.btn_prev, getPendingIntent(context, ACTION_PREV))
             views.setOnClickPendingIntent(R.id.btn_fav, getPendingIntent(context, ACTION_LIKE))
+
+            views.setOnClickPendingIntent(R.id.btn_mode1, getPendingIntent(context, ACTION_MODE1))
+            views.setOnClickPendingIntent(R.id.btn_mode2, getPendingIntent(context, ACTION_MODE2))
+            views.setOnClickPendingIntent(R.id.btn_mode3, getPendingIntent(context, ACTION_MODE3))
         } else {
             views.setOnClickPendingIntent(R.id.widgetPlay, getPendingIntent(context, ACTION_PLAY_PAUSE))
             views.setOnClickPendingIntent(R.id.widgetNext, getPendingIntent(context, ACTION_NEXT))
@@ -81,9 +72,10 @@ class MyMusicWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.heart, getPendingIntent(context, ACTION_LIKE))
         }
 
-        appWidgetManager.updateAppWidget(widgetId, views)
+        manager.updateAppWidget(id, views)
     }
 }
+
 
 
 

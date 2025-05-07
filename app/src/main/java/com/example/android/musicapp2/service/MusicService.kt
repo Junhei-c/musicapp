@@ -26,20 +26,15 @@ class MusicService : Service() {
             MyMusicWidget.ACTION_PREV -> playerManager.playPrevious()
             MyMusicWidget.ACTION_LIKE -> {
                 playerManager.getCurrentData()?.let {
-                    if (likedSongs.contains(it.id)) {
-                        likedSongs.remove(it.id)
-                    } else {
-                        likedSongs.add(it.id)
-                    }
+                    if (likedSongs.contains(it.id)) likedSongs.remove(it.id) else likedSongs.add(it.id)
                 }
             }
+            MyMusicWidget.ACTION_MODE1 -> playerManager.play(2)
+            MyMusicWidget.ACTION_MODE2 -> playerManager.play(0)
+            MyMusicWidget.ACTION_MODE3 -> playerManager.play(1)
         }
 
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            updateAllWidgets()
-        }, 200)
-
+        Handler(Looper.getMainLooper()).postDelayed({ updateAllWidgets() }, 200)
         return START_NOT_STICKY
     }
 
@@ -47,7 +42,6 @@ class MusicService : Service() {
         val manager = AppWidgetManager.getInstance(this)
         val component = ComponentName(this, MyMusicWidget::class.java)
         val widgetIds = manager.getAppWidgetIds(component)
-
         val data = playerManager.getCurrentData()
         val isPlaying = playerManager.isPlaying()
 
@@ -67,15 +61,11 @@ class MusicService : Service() {
             views.setImageViewResource(playId, playIcon)
             views.setOnClickPendingIntent(playId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PLAY_PAUSE))
 
-            views.setOnClickPendingIntent(
-                if (isExpanded) R.id.btn_next else R.id.widgetNext,
-                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_NEXT)
-            )
+            views.setOnClickPendingIntent(if (isExpanded) R.id.btn_next else R.id.widgetNext,
+                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_NEXT))
 
-            views.setOnClickPendingIntent(
-                if (isExpanded) R.id.btn_prev else R.id.widgetPrev,
-                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PREV)
-            )
+            views.setOnClickPendingIntent(if (isExpanded) R.id.btn_prev else R.id.widgetPrev,
+                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PREV))
 
             val isLiked = data?.id?.let { likedSongs.contains(it) } ?: false
             val likeIcon = if (isLiked) R.drawable.heart else R.drawable.whiteheart
@@ -83,12 +73,19 @@ class MusicService : Service() {
             views.setImageViewResource(likeId, likeIcon)
             views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_LIKE))
 
+            if (isExpanded) {
+                views.setOnClickPendingIntent(R.id.btn_mode1, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE1))
+                views.setOnClickPendingIntent(R.id.btn_mode2, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE2))
+                views.setOnClickPendingIntent(R.id.btn_mode3, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE3))
+            }
+
             manager.updateAppWidget(id, views)
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
 
 
 
