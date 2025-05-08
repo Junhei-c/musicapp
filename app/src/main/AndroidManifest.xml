@@ -38,7 +38,11 @@
                 <action android:name="com.example.android.musicapp2.ACTION_NEXT" />
                 <action android:name="com.example.android.musicapp2.ACTION_PREV" />
                 <action android:name="com.example.android.musicapp2.ACTION_LIKE" />
+                <action android:name="com.example.android.musicapp2.ACTION_MODE1" />
+                <action android:name="com.example.android.musicapp2.ACTION_MODE2" />
+                <action android:name="com.example.android.musicapp2.ACTION_MODE3" />
             </intent-filter>
+
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/now_playing_widget_info" />

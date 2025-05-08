@@ -27,6 +27,8 @@
     <color name="colorOnSurface">@color/color_on_surface</color>
     <color name="colorBackground">@color/color_background</color>
     <color name="colorSurface">@color/color_surface</color>
+    <color name="iconBlueColorAndDark">#2196F3</color>
+
 
 </resources>
 

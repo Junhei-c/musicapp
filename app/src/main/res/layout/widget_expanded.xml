@@ -119,7 +119,7 @@
             android:id="@+id/btn_mode3"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="@drawable/bg_selected_rounded"
+            android:background="@drawable/bg_gray_rounded"
             android:src="@drawable/windchime"
             android:scaleType="centerInside" />
     </LinearLayout>
