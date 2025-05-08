@@ -7,7 +7,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.android.musicapp2.model.DataModel
 
-class PlayerManager private constructor(private val context: Context) {
+class PlayerManager private constructor(context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<DataModel> = emptyList()
@@ -18,11 +18,7 @@ class PlayerManager private constructor(private val context: Context) {
 
     init {
         player.addListener(object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                listener?.invoke()
-            }
-
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            override fun onEvents(player: Player, events: Player.Events) {
                 currentIndex = player.currentMediaItemIndex
                 listener?.invoke()
             }
@@ -57,31 +53,32 @@ class PlayerManager private constructor(private val context: Context) {
         player.playWhenReady = false
     }
 
+    fun togglePlayback(index: Int) {
+        if (currentIndex == index && player.isPlaying) pause() else play(index)
+    }
+
     fun playNext() {
-        if (playlist.isEmpty()) return
-        val nextIndex = (currentIndex + 1) % playlist.size
-        play(nextIndex)
+        if (playlist.isNotEmpty()) play((currentIndex + 1) % playlist.size)
     }
 
     fun playPrevious() {
-        if (playlist.isEmpty()) return
-        val prevIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
-        play(prevIndex)
-    }
-
-    fun togglePlayback(index: Int) {
-        if (currentIndex == index && player.isPlaying) {
-            pause()
-        } else {
-            play(index)
+        if (playlist.isNotEmpty()) {
+            val prev = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+            play(prev)
         }
     }
 
     fun isPlaying(): Boolean = player.isPlaying
 
-    fun getPlaylistSize(): Int = playlist.size
+    fun getPlaybackPercentage(): Int {
+        val duration = player.duration
+        val position = player.currentPosition
+        return if (duration > 0) ((position * 100) / duration).toInt() else 0
+    }
 
-    fun getCurrentMediaItem(): MediaItem? = player.currentMediaItem
+    fun getDuration(): Long = player.duration
+    fun getCurrentPosition(): Long = player.currentPosition
+    fun seekTo(positionMs: Long) = player.seekTo(positionMs)
 
     fun setOnPlaybackChangedListener(callback: () -> Unit) {
         listener = callback
@@ -101,6 +98,10 @@ class PlayerManager private constructor(private val context: Context) {
         }
     }
 }
+
+
+
+
 
 
 

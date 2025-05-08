@@ -22,69 +22,85 @@ class MusicService : Service() {
 
         when (intent?.action) {
             MyMusicWidget.ACTION_PLAY_PAUSE -> playerManager.togglePlayback(playerManager.currentIndex)
-            MyMusicWidget.ACTION_NEXT -> playerManager.playNext()
-            MyMusicWidget.ACTION_PREV -> playerManager.playPrevious()
-            MyMusicWidget.ACTION_LIKE -> {
-                playerManager.getCurrentData()?.let {
-                    if (likedSongs.contains(it.id)) likedSongs.remove(it.id) else likedSongs.add(it.id)
-                }
-            }
-            MyMusicWidget.ACTION_MODE1 -> playerManager.play(2)
-            MyMusicWidget.ACTION_MODE2 -> playerManager.play(0)
-            MyMusicWidget.ACTION_MODE3 -> playerManager.play(1)
+            MyMusicWidget.ACTION_NEXT       -> playerManager.playNext()
+            MyMusicWidget.ACTION_PREV       -> playerManager.playPrevious()
+            MyMusicWidget.ACTION_LIKE       -> toggleLike()
+            MyMusicWidget.ACTION_MODE1      -> playerManager.play(2)
+            MyMusicWidget.ACTION_MODE2      -> playerManager.play(0)
+            MyMusicWidget.ACTION_MODE3      -> playerManager.play(1)
         }
 
-        Handler(Looper.getMainLooper()).postDelayed({ updateAllWidgets() }, 200)
+        Handler(Looper.getMainLooper()).postDelayed({
+            updateAllWidgets()
+        }, 100)
+
         return START_NOT_STICKY
     }
 
-    private fun updateAllWidgets() {
-        val manager = AppWidgetManager.getInstance(this)
-        val component = ComponentName(this, MyMusicWidget::class.java)
-        val widgetIds = manager.getAppWidgetIds(component)
-        val data = playerManager.getCurrentData()
-        val isPlaying = playerManager.isPlaying()
+    private fun toggleLike() {
+        playerManager.getCurrentData()?.let {
+            if (!likedSongs.add(it.id)) likedSongs.remove(it.id)
+        }
+    }
 
-        for (id in widgetIds) {
-            val options = manager.getAppWidgetOptions(id)
-            val isExpanded = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
+    private fun updateAllWidgets() {
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val widgetIds = appWidgetManager.getAppWidgetIds(ComponentName(this, MyMusicWidget::class.java))
+
+        widgetIds.forEach { widgetId ->
+            val isExpanded = appWidgetManager.getAppWidgetOptions(widgetId)
+                .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
             val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
             val views = RemoteViews(packageName, layoutId)
 
-            data?.let {
-                views.setTextViewText(R.id.widgetSongTitle, it.name)
-                views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
-            }
+            updateWidgetUI(views, isExpanded)
 
-            val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
-            val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
-            views.setImageViewResource(playId, playIcon)
-            views.setOnClickPendingIntent(playId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PLAY_PAUSE))
+            appWidgetManager.updateAppWidget(widgetId, views)
+        }
+    }
 
-            views.setOnClickPendingIntent(if (isExpanded) R.id.btn_next else R.id.widgetNext,
-                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_NEXT))
+    private fun updateWidgetUI(views: RemoteViews, isExpanded: Boolean) {
+        val song = playerManager.getCurrentData()
+        val isPlaying = playerManager.isPlaying()
+        val progress = playerManager.getPlaybackPercentage()
 
-            views.setOnClickPendingIntent(if (isExpanded) R.id.btn_prev else R.id.widgetPrev,
-                MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PREV))
+        song?.let {
+            views.setTextViewText(R.id.widgetSongTitle, it.name)
+            views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
+        }
 
-            val isLiked = data?.id?.let { likedSongs.contains(it) } ?: false
-            val likeIcon = if (isLiked) R.drawable.heart else R.drawable.whiteheart
-            val likeId = if (isExpanded) R.id.btn_fav else R.id.heart
-            views.setImageViewResource(likeId, likeIcon)
-            views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_LIKE))
+        val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
+        val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
+        views.setImageViewResource(playId, playIcon)
+        views.setProgressBar(R.id.music_progress, 100, progress, false)
 
-            if (isExpanded) {
-                views.setOnClickPendingIntent(R.id.btn_mode1, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE1))
-                views.setOnClickPendingIntent(R.id.btn_mode2, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE2))
-                views.setOnClickPendingIntent(R.id.btn_mode3, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE3))
-            }
+        val likeIcon = if (song?.id != null && likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart
+        val likeId = if (isExpanded) R.id.btn_fav else R.id.heart
+        views.setImageViewResource(likeId, likeIcon)
 
-            manager.updateAppWidget(id, views)
+
+        views.setOnClickPendingIntent(playId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PLAY_PAUSE))
+        views.setOnClickPendingIntent(
+            if (isExpanded) R.id.btn_next else R.id.widgetNext,
+            MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_NEXT)
+        )
+        views.setOnClickPendingIntent(
+            if (isExpanded) R.id.btn_prev else R.id.widgetPrev,
+            MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PREV)
+        )
+        views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_LIKE))
+
+        if (isExpanded) {
+            views.setOnClickPendingIntent(R.id.btn_mode1, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE1))
+            views.setOnClickPendingIntent(R.id.btn_mode2, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE2))
+            views.setOnClickPendingIntent(R.id.btn_mode3, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE3))
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
+
 
 
 

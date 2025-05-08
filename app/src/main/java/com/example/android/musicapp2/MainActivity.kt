@@ -1,6 +1,9 @@
 package com.example.android.musicapp2
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -19,10 +22,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var playerManager: PlayerManager
     private lateinit var adapter: SongAdapter
 
-    private var currentIndex: Int = -1
-
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
+    }
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val progressUpdater = object : Runnable {
+        override fun run() {
+            if (playerManager.isPlaying()) {
+                binding.progressBar.progress = playerManager.getPlaybackPercentage()
+                handler.postDelayed(this, 1000)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,10 +41,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
-
-        binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
+        setupToolbar()
+        setupRecyclerView()
 
         viewModel.data.observe(this) { songs ->
             setupPlayer(songs)
@@ -41,11 +50,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.buttonPlayPause.setOnClickListener {
-            if (currentIndex != -1) {
-                playerManager.togglePlayback(currentIndex)
-                updateNowPlaying()
-            }
+            val index = playerManager.currentIndex
+            if (index != -1) playerManager.togglePlayback(index)
         }
+
+        binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    val newPosition = (playerManager.getDuration() * (progress / 100f)).toLong()
+                    playerManager.seekTo(newPosition)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
     }
 
     private fun setupPlayer(songs: List<DataModel>) {
@@ -54,6 +82,8 @@ class MainActivity : AppCompatActivity() {
             setOnPlaybackChangedListener {
                 updateNowPlaying()
                 adapter.notifyDataSetChanged()
+                handler.removeCallbacks(progressUpdater)
+                if (isPlaying()) handler.post(progressUpdater)
             }
         }
     }
@@ -62,38 +92,43 @@ class MainActivity : AppCompatActivity() {
         adapter = SongAdapter(
             songs = songs,
             onSongClick = { _, index ->
-                currentIndex = index
                 playerManager.togglePlayback(index)
-                updateNowPlaying()
             },
             isItemPlaying = { index ->
-                index == currentIndex && playerManager.isPlaying()
+                index == playerManager.currentIndex && playerManager.isPlaying()
             }
         )
         binding.recyclerViewSongs.adapter = adapter
     }
 
     private fun updateNowPlaying() {
+        val song = playerManager.getCurrentData()
         val isPlaying = playerManager.isPlaying()
-        val currentSong = playerManager.getCurrentData()
 
-        binding.textViewCurrentTitle.text = currentSong?.name.orEmpty()
-        binding.textViewCurrentTitle.setTextColor(ContextCompat.getColor(this, R.color.black))
-
-        currentSong?.imageRes?.let {
-            binding.imageViewNowPlayingIcon.setImageResource(it)
+        binding.textViewCurrentTitle.apply {
+            text = song?.name.orEmpty()
+            setTextColor(ContextCompat.getColor(context, R.color.black))
         }
+
+        song?.imageRes?.let { binding.imageViewNowPlayingIcon.setImageResource(it) }
 
         binding.buttonPlayPause.setImageResource(
             if (isPlaying) R.drawable.iconparkpauseone else R.drawable.iconparkplay
         )
+
+        binding.progressBar.progress = playerManager.getPlaybackPercentage()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(progressUpdater)
         playerManager.release()
     }
 }
+
+
+
+
 
 
 
