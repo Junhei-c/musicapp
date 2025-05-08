@@ -16,18 +16,28 @@ class MusicService : Service() {
 
     private lateinit var playerManager: PlayerManager
     private val likedSongs = mutableSetOf<Int>()
+    private var selectedMode = -1
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         playerManager = PlayerManager.getInstance(this)
 
         when (intent?.action) {
             MyMusicWidget.ACTION_PLAY_PAUSE -> playerManager.togglePlayback(playerManager.currentIndex)
-            MyMusicWidget.ACTION_NEXT       -> playerManager.playNext()
-            MyMusicWidget.ACTION_PREV       -> playerManager.playPrevious()
-            MyMusicWidget.ACTION_LIKE       -> toggleLike()
-            MyMusicWidget.ACTION_MODE1      -> playerManager.play(2)
-            MyMusicWidget.ACTION_MODE2      -> playerManager.play(0)
-            MyMusicWidget.ACTION_MODE3      -> playerManager.play(1)
+            MyMusicWidget.ACTION_NEXT -> playerManager.playNext()
+            MyMusicWidget.ACTION_PREV -> playerManager.playPrevious()
+            MyMusicWidget.ACTION_LIKE -> toggleLike()
+            MyMusicWidget.ACTION_MODE1 -> {
+                playerManager.play(2)
+                selectedMode = 0
+            }
+            MyMusicWidget.ACTION_MODE2 -> {
+                playerManager.play(0)
+                selectedMode = 1
+            }
+            MyMusicWidget.ACTION_MODE3 -> {
+                playerManager.play(1)
+                selectedMode = 2
+            }
         }
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -44,18 +54,16 @@ class MusicService : Service() {
     }
 
     private fun updateAllWidgets() {
-        val appWidgetManager = AppWidgetManager.getInstance(this)
-        val widgetIds = appWidgetManager.getAppWidgetIds(ComponentName(this, MyMusicWidget::class.java))
+        val manager = AppWidgetManager.getInstance(this)
+        val ids = manager.getAppWidgetIds(ComponentName(this, MyMusicWidget::class.java))
 
-        widgetIds.forEach { widgetId ->
-            val isExpanded = appWidgetManager.getAppWidgetOptions(widgetId)
-                .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
+        ids.forEach { id ->
+            val options = manager.getAppWidgetOptions(id)
+            val isExpanded = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
             val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
             val views = RemoteViews(packageName, layoutId)
-
             updateWidgetUI(views, isExpanded)
-
-            appWidgetManager.updateAppWidget(widgetId, views)
+            manager.updateAppWidget(id, views)
         }
     }
 
@@ -90,15 +98,21 @@ class MusicService : Service() {
         )
         views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_LIKE))
 
+
         if (isExpanded) {
             views.setOnClickPendingIntent(R.id.btn_mode1, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE1))
             views.setOnClickPendingIntent(R.id.btn_mode2, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE2))
             views.setOnClickPendingIntent(R.id.btn_mode3, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_MODE3))
+
+            views.setBoolean(R.id.btn_mode1, "setSelected", selectedMode == 0)
+            views.setBoolean(R.id.btn_mode2, "setSelected", selectedMode == 1)
+            views.setBoolean(R.id.btn_mode3, "setSelected", selectedMode == 2)
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
 
 
 
