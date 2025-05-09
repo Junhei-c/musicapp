@@ -79,7 +79,7 @@ class MusicService : Service() {
             views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
         }
 
-        // Play/Pause
+
         val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
         val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
         views.setImageViewResource(playId, playIcon)
