@@ -1,5 +1,6 @@
 package com.example.android.musicapp2
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +13,7 @@ import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.repository.DataRepository
+import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
@@ -45,13 +47,17 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
 
         viewModel.data.observe(this) { songs ->
-            setupPlayer(songs)
-            setupAdapter(songs)
+            setupPlayer(songs)     // ✅ FIRST
+            setupAdapter(songs)    // ✅ THEN THIS
         }
 
         binding.buttonPlayPause.setOnClickListener {
             val index = playerManager.currentIndex
-            if (index != -1) playerManager.togglePlayback(index)
+            if (index != -1) {
+                playerManager.togglePlayback(index)
+                updateNowPlaying()
+                triggerWidgetUpdate()
+            }
         }
 
         binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -84,6 +90,7 @@ class MainActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)
+                triggerWidgetUpdate()
             }
         }
     }
@@ -93,6 +100,8 @@ class MainActivity : AppCompatActivity() {
             songs = songs,
             onSongClick = { _, index ->
                 playerManager.togglePlayback(index)
+                updateNowPlaying()
+                triggerWidgetUpdate()
             },
             isItemPlaying = { index ->
                 index == playerManager.currentIndex && playerManager.isPlaying()
@@ -105,11 +114,7 @@ class MainActivity : AppCompatActivity() {
         val song = playerManager.getCurrentData()
         val isPlaying = playerManager.isPlaying()
 
-        binding.textViewCurrentTitle.apply {
-            text = song?.name.orEmpty()
-            setTextColor(ContextCompat.getColor(context, R.color.black))
-        }
-
+        binding.textViewCurrentTitle.text = song?.name.orEmpty()
         song?.imageRes?.let { binding.imageViewNowPlayingIcon.setImageResource(it) }
 
         binding.buttonPlayPause.setImageResource(
@@ -119,14 +124,19 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.progress = playerManager.getPlaybackPercentage()
     }
 
+    private fun triggerWidgetUpdate() {
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = "REFRESH_WIDGET"
+        }
+        startService(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(progressUpdater)
         playerManager.release()
     }
 }
-
-
 
 
 

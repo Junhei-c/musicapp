@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
-import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
 
 class MyMusicWidget : AppWidgetProvider() {
@@ -22,7 +21,6 @@ class MyMusicWidget : AppWidgetProvider() {
         const val ACTION_MODE2 = "com.example.android.musicapp2.ACTION_MODE2"
         const val ACTION_MODE3 = "com.example.android.musicapp2.ACTION_MODE3"
 
-        @JvmStatic
         fun getPendingIntent(context: Context, action: String): PendingIntent {
             val intent = Intent(context, MusicService::class.java).apply {
                 this.action = action
@@ -40,38 +38,16 @@ class MyMusicWidget : AppWidgetProvider() {
         for (id in ids) updateWidget(context, manager, id)
     }
 
-    override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, newOptions: Bundle) {
+    override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
         updateWidget(context, manager, id)
     }
 
     private fun updateWidget(context: Context, manager: AppWidgetManager, id: Int) {
         val options = manager.getAppWidgetOptions(id)
         val isExpanded = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
-        val layoutRes = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
-        val views = RemoteViews(context.packageName, layoutRes)
-        val song = DataRepository().getData().firstOrNull()
+        val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
 
-        song?.let {
-            views.setTextViewText(R.id.widgetSongTitle, it.name)
-            views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
-        }
-
-        if (isExpanded) {
-            views.setOnClickPendingIntent(R.id.btn_play_pause, getPendingIntent(context, ACTION_PLAY_PAUSE))
-            views.setOnClickPendingIntent(R.id.btn_next, getPendingIntent(context, ACTION_NEXT))
-            views.setOnClickPendingIntent(R.id.btn_prev, getPendingIntent(context, ACTION_PREV))
-            views.setOnClickPendingIntent(R.id.btn_fav, getPendingIntent(context, ACTION_LIKE))
-
-            views.setOnClickPendingIntent(R.id.btn_mode1, getPendingIntent(context, ACTION_MODE1))
-            views.setOnClickPendingIntent(R.id.btn_mode2, getPendingIntent(context, ACTION_MODE2))
-            views.setOnClickPendingIntent(R.id.btn_mode3, getPendingIntent(context, ACTION_MODE3))
-        } else {
-            views.setOnClickPendingIntent(R.id.widgetPlay, getPendingIntent(context, ACTION_PLAY_PAUSE))
-            views.setOnClickPendingIntent(R.id.widgetNext, getPendingIntent(context, ACTION_NEXT))
-            views.setOnClickPendingIntent(R.id.widgetPrev, getPendingIntent(context, ACTION_PREV))
-            views.setOnClickPendingIntent(R.id.heart, getPendingIntent(context, ACTION_LIKE))
-        }
-
+        val views = RemoteViews(context.packageName, layoutId)
         manager.updateAppWidget(id, views)
     }
 }

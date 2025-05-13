@@ -14,20 +14,20 @@ class PlayerManager private constructor(context: Context) {
     var currentIndex: Int = -1
         private set
 
-    private var listener: (() -> Unit)? = null
+    private var onPlaybackChanged: (() -> Unit)? = null
 
     init {
         player.addListener(object : Player.Listener {
             override fun onEvents(player: Player, events: Player.Events) {
                 currentIndex = player.currentMediaItemIndex
-                listener?.invoke()
+                onPlaybackChanged?.invoke()
             }
         })
     }
 
     fun setPlaylist(data: List<DataModel>) {
         playlist = data
-        player.setMediaItems(data.map {
+        val mediaItems = data.map {
             MediaItem.Builder()
                 .setUri(it.url)
                 .setMediaMetadata(
@@ -35,8 +35,10 @@ class PlayerManager private constructor(context: Context) {
                         .setTitle(it.name)
                         .setArtist("Unknown Artist")
                         .build()
-                ).build()
-        })
+                )
+                .build()
+        }
+        player.setMediaItems(mediaItems)
         player.prepare()
     }
 
@@ -54,7 +56,8 @@ class PlayerManager private constructor(context: Context) {
     }
 
     fun togglePlayback(index: Int) {
-        if (currentIndex == index && player.isPlaying) pause() else play(index)
+        if (currentIndex == index && player.isPlaying) pause()
+        else play(index)
     }
 
     fun playNext() {
@@ -63,8 +66,8 @@ class PlayerManager private constructor(context: Context) {
 
     fun playPrevious() {
         if (playlist.isNotEmpty()) {
-            val prev = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
-            play(prev)
+            val prevIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+            play(prevIndex)
         }
     }
 
@@ -80,8 +83,8 @@ class PlayerManager private constructor(context: Context) {
     fun getCurrentPosition(): Long = player.currentPosition
     fun seekTo(positionMs: Long) = player.seekTo(positionMs)
 
-    fun setOnPlaybackChangedListener(callback: () -> Unit) {
-        listener = callback
+    fun setOnPlaybackChangedListener(listener: () -> Unit) {
+        onPlaybackChanged = listener
     }
 
     fun release() {
@@ -98,6 +101,7 @@ class PlayerManager private constructor(context: Context) {
         }
     }
 }
+
 
 
 
