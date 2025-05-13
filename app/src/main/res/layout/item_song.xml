@@ -8,10 +8,8 @@
         android:id="@+id/cardViewItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginVertical="8dp"
+        android:layout_marginHorizontal="16dp"
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp">
 
@@ -35,15 +33,18 @@
                 android:id="@+id/textViewSongName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Song Title"
-                android:textColor="@color/black"
+                android:text="Song Name"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginStart="12dp"
+                android:textColor="@color/black"
                 app:layout_constraintStart_toEndOf="@id/imageViewIcon"
+                app:layout_constraintEnd_toStartOf="@id/buttonPlay"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/buttonPlay" />
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <ImageButton
                 android:id="@+id/buttonPlay"
@@ -59,6 +60,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </layout>
+
 
 
 

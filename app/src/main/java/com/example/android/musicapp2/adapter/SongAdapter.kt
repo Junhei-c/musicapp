@@ -21,27 +21,24 @@ class SongAdapter(
 
         fun bind(song: DataModel, position: Int) {
             val context = binding.root.context
-            val playing = isItemPlaying(position)
+            val isPlaying = isItemPlaying(position)
 
             binding.textViewSongName.text = song.name
-
-
-            binding.imageViewIcon.visibility = if (playing) View.VISIBLE else View.INVISIBLE
-            if (playing) {
-                binding.imageViewIcon.setImageResource(R.drawable.group)
+            binding.imageViewIcon.apply {
+                visibility = if (isPlaying) View.VISIBLE else View.INVISIBLE
+                if (isPlaying) setImageResource(R.drawable.group)
             }
 
+            binding.buttonPlay.setImageResource(
+                if (isPlaying) R.drawable.pause else R.drawable.play
+            )
 
-            val playIcon = if (playing) R.drawable.pause else R.drawable.play
-            binding.buttonPlay.setImageResource(playIcon)
-
-
-            val cardColor = if (playing)
-                Color.parseColor("#43CCF8")
-            else
-                ContextCompat.getColor(context, R.color.white)
-            binding.cardViewItem.setCardBackgroundColor(cardColor)
-
+            binding.cardViewItem.setCardBackgroundColor(
+                if (isPlaying)
+                    Color.parseColor("#43CCF8")
+                else
+                    ContextCompat.getColor(context, R.color.white)
+            )
 
             binding.buttonPlay.setOnClickListener {
                 onSongClick(song, position)
@@ -60,6 +57,7 @@ class SongAdapter(
 
     override fun getItemCount(): Int = songs.size
 }
+
 
 
 
