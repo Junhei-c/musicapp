@@ -6,21 +6,23 @@
     <string name="toolbar_title">Music App</string>
 
 
-    <string name="song_icon">Song icon</string>
-    <string name="now_playing_icon">Now playing icon</string>
-    <string name="play_pause_button_desc">Play or pause the current song</string>
-
-
     <string name="default_title">No Title</string>
+    <string name="play_pause_button_desc">Play or pause the current song</string>
+    <string name="enter_pip">Enter PiP</string>
+    <string name="now_playing_icon">Now playing icon</string>
+    <string name="song_icon">Song icon</string>
 
 
     <string name="widget_song_title">Yellow</string>
-    <string name="widget_artist">Cold Play</string>
+    <string name="widget_artist">Coldplay</string>
+
+
     <string name="widget_prev_desc">Previous</string>
     <string name="widget_play_desc">Play</string>
     <string name="widget_next_desc">Next</string>
 
 </resources>
+
 
 
 

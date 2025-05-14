@@ -1,9 +1,12 @@
 package com.example.android.musicapp2
 
+import android.app.PictureInPictureParams
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Rational
 import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -47,8 +50,8 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
 
         viewModel.data.observe(this) { songs ->
-            setupPlayer(songs)     // ✅ FIRST
-            setupAdapter(songs)    // ✅ THEN THIS
+            setupPlayer(songs)
+            setupAdapter(songs)
         }
 
         binding.buttonPlayPause.setOnClickListener {
@@ -57,6 +60,15 @@ class MainActivity : AppCompatActivity() {
                 playerManager.togglePlayback(index)
                 updateNowPlaying()
                 triggerWidgetUpdate()
+            }
+        }
+
+        binding.buttonEnterPip.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val pipParams = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(pipParams)
             }
         }
 
@@ -71,6 +83,16 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+    }
+
+    override fun onUserLeaveHint() {
+        if (playerManager.isPlaying() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val pipParams = PictureInPictureParams.Builder()
+                .setAspectRatio(Rational(16, 9))
+                .build()
+            enterPictureInPictureMode(pipParams)
+        }
+        super.onUserLeaveHint()
     }
 
     private fun setupToolbar() {
@@ -137,6 +159,8 @@ class MainActivity : AppCompatActivity() {
         playerManager.release()
     }
 }
+
+
 
 
 

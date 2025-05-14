@@ -9,7 +9,7 @@ import android.os.Build
 import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.utils.PlayerStateManager
 
-class WidgetReceiver : BroadcastReceiver() {
+class  WidgetReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_PLAY = "com.example.android.musicapp2.ACTION_PLAY"
