@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/circle_widget_root"
-    android:layout_width="200dp"
-    android:layout_height="200dp"
+    android:layout_width="@dimen/widget_circle_frame_size"
+    android:layout_height="@dimen/widget_circle_frame_size"
     android:background="@drawable/bg_widget_circle"
-    android:padding="8dp">
-
+    android:padding="@dimen/widget_circle_padding">
 
     <ImageView
         android:id="@+id/circle_album_art"
@@ -14,24 +12,23 @@
         android:scaleType="centerInside"
         android:src="@drawable/earlybirds" />
 
-
     <ImageView
         android:id="@+id/circle_play"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/widget_circle_play_size"
+        android:layout_height="@dimen/widget_circle_play_size"
         android:layout_gravity="bottom|start"
-        android:layout_margin="8dp"
+        android:layout_margin="@dimen/widget_circle_margin"
         android:src="@drawable/bigplay" />
-
 
     <ImageView
         android:id="@+id/circle_like"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="@dimen/widget_circle_like_size"
+        android:layout_height="@dimen/widget_circle_like_size"
         android:layout_gravity="top|end"
-        android:layout_margin="8dp"
+        android:layout_margin="@dimen/widget_circle_margin"
         android:src="@drawable/heart" />
 </FrameLayout>
+
 
 
 

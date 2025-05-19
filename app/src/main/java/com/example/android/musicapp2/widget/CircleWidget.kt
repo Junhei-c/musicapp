@@ -1,19 +1,90 @@
 package com.example.android.musicapp2.widget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
+import com.example.android.musicapp2.service.MusicService
+import com.example.android.musicapp2.utils.PlayerManager
 
 class CircleWidget : AppWidgetProvider() {
+
+    companion object {
+        const val ACTION_PLAY = "com.example.android.musicapp2.ACTION_PLAY"
+        const val ACTION_LIKE = "com.example.android.musicapp2.ACTION_LIKE"
+    }
+
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         for (id in ids) {
-            val views = RemoteViews(context.packageName, R.layout.widget_circle)
-            manager.updateAppWidget(id, views)
+            updateWidgetUI(context, manager, id)
         }
     }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        when (intent.action) {
+            ACTION_PLAY -> {
+                val playerManager = PlayerManager.getInstance(context)
+                playerManager.togglePlayback(playerManager.currentIndex)
+            }
+            ACTION_LIKE -> {
+                val playerManager = PlayerManager.getInstance(context)
+                playerManager.getCurrentData()?.let {
+                    if (!MusicService.likedSongs.add(it.id)) {
+                        MusicService.likedSongs.remove(it.id)
+                    }
+                }
+            }
+        }
+
+        // Force widget UI update immediately
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, CircleWidget::class.java))
+        for (id in ids) {
+            updateWidgetUI(context, manager, id)
+        }
+    }
+
+    private fun updateWidgetUI(context: Context, manager: AppWidgetManager, widgetId: Int) {
+        val views = RemoteViews(context.packageName, R.layout.widget_circle)
+        val playerManager = PlayerManager.getInstance(context)
+        val song = playerManager.getCurrentData()
+        val isPlaying = playerManager.isPlaying()
+
+        views.setImageViewResource(R.id.circle_album_art, song?.imageRes ?: R.drawable.earlybirds)
+        views.setImageViewResource(
+            R.id.circle_play,
+            if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
+        )
+        views.setImageViewResource(
+            R.id.circle_like,
+            if (song?.id != null && MusicService.likedSongs.contains(song.id))
+                R.drawable.heart else R.drawable.whiteheart
+        )
+
+        views.setOnClickPendingIntent(R.id.circle_play, getPendingIntent(context, ACTION_PLAY))
+        views.setOnClickPendingIntent(R.id.circle_like, getPendingIntent(context, ACTION_LIKE))
+
+        manager.updateAppWidget(widgetId, views)
+    }
+
+    private fun getPendingIntent(context: Context, action: String): PendingIntent {
+        val intent = Intent(context, CircleWidget::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            action.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 }
+
 
 
 

@@ -12,7 +12,12 @@ import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.widget.MyMusicWidget
 
+
 class MusicService : Service() {
+    companion object {
+        val likedSongs = mutableSetOf<Int>()
+    }
+
 
     private lateinit var playerManager: PlayerManager
     private val likedSongs = mutableSetOf<Int>()
@@ -38,7 +43,7 @@ class MusicService : Service() {
                 playerManager.play(1)
                 selectedMode = 2
             }
-            "REFRESH_WIDGET" -> {} // Just force widget update
+            "REFRESH_WIDGET" -> {}
         }
 
         Handler(Looper.getMainLooper()).postDelayed({ updateAllWidgets() }, 100)
