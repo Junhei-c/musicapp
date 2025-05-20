@@ -13,9 +13,6 @@
     <string name="song_icon">Song icon</string>
 
 
-    <string name="widget_song_title">Yellow</string>
-    <string name="widget_artist">Coldplay</string>
-
 
     <string name="widget_prev_desc">Previous</string>
     <string name="widget_play_desc">Play</string>
