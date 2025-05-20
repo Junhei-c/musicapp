@@ -10,6 +10,7 @@ import android.os.Looper
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.PlayerManager
+import com.example.android.musicapp2.utils.PlayerStateManager
 import com.example.android.musicapp2.widget.MyMusicWidget
 
 
@@ -62,6 +63,9 @@ class MusicService : Service() {
         val song = playerManager.getCurrentData()
         val isPlaying = playerManager.isPlaying()
         val progress = playerManager.getPlaybackPercentage()
+        val songTitle = PlayerStateManager.getCurrentSongTitle(this)
+        val songArtist = PlayerStateManager.getCurrentArtist(this)
+
 
         ids.forEach { id ->
             val isExpanded = manager.getAppWidgetOptions(id)
@@ -69,10 +73,14 @@ class MusicService : Service() {
             val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
             val views = RemoteViews(packageName, layoutId)
 
-            song?.let {
-                views.setTextViewText(R.id.widgetSongTitle, it.name)
-                views.setImageViewResource(R.id.widgetAlbumArt, it.imageRes)
+            views.setTextViewText(R.id.widgetSongTitle, songTitle)
+            if (layoutId == R.layout.widget_now_playing) {
+                views.setTextViewText(R.id.widgetArtist, songArtist)
             }
+            if (song != null) {
+                views.setImageViewResource(R.id.widgetAlbumArt, song.imageRes)
+            }
+
 
             val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
             val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay

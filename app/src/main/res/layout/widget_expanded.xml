@@ -1,134 +1,128 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/widget_expanded_height"
+    android:background="@drawable/bg_widget_rounded"
+    android:padding="@dimen/widget_expanded_padding">
 
-    <data />
-
-    <FrameLayout
+    <LinearLayout
+        android:id="@+id/widget_root"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/widget_expanded_height"
-        android:background="@drawable/bg_widget_rounded"
-        android:padding="@dimen/widget_expanded_padding">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/widget_root"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="@dimen/widget_title_margin_bottom">
-
-                <ImageView
-                    android:id="@+id/widgetAlbumArt"
-                    android:layout_width="@dimen/widget_albumart_size"
-                    android:layout_height="@dimen/widget_albumart_size"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/bg_gray_rounded"
-                    android:src="@drawable/group"
-                    android:layout_marginEnd="@dimen/widget_albumart_margin_end" />
-
-                <TextView
-                    android:id="@+id/widgetSongTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/widget_song_title"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/widget_title_text_size"
-                    android:textStyle="bold"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-
-                <ImageView
-                    android:id="@+id/btn_fav"
-                    android:layout_width="@dimen/widget_fav_icon_size"
-                    android:layout_height="@dimen/widget_fav_icon_size"
-                    android:src="@drawable/heart"
-                    android:layout_marginStart="@dimen/widget_fav_icon_margin_start" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="@dimen/widget_controls_margin_bottom">
-
-                <ImageView
-                    android:id="@+id/btn_prev"
-                    android:layout_width="@dimen/widget_icon_prev_next"
-                    android:layout_height="@dimen/widget_icon_prev_next"
-                    android:src="@drawable/prev"
-                    android:layout_marginEnd="@dimen/widget_control_spacing" />
-
-                <ImageView
-                    android:id="@+id/btn_play_pause"
-                    android:layout_width="@dimen/widget_icon_play"
-                    android:layout_height="@dimen/widget_icon_play"
-                    android:src="@drawable/bigplay"
-                    android:layout_marginEnd="@dimen/widget_control_spacing" />
-
-                <ImageView
-                    android:id="@+id/btn_next"
-                    android:layout_width="@dimen/widget_icon_prev_next"
-                    android:layout_height="@dimen/widget_icon_prev_next"
-                    android:src="@drawable/next" />
-            </LinearLayout>
-
-            <ProgressBar
-                android:id="@+id/music_progress"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/widget_progress_height"
-                android:max="100"
-                android:progress="40"
-                android:progressDrawable="@drawable/progress_drawable"
-                android:layout_marginBottom="@dimen/widget_progress_margin_bottom" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/mode_controls"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="@dimen/widget_mode_button_margin_start"
-            android:layout_marginBottom="@dimen/widget_mode_button_margin_bottom"
-            android:padding="@dimen/widget_mode_button_padding">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="@dimen/widget_title_margin_bottom">
 
-            <ImageButton
-                android:id="@+id/btn_mode1"
-                android:layout_width="@dimen/widget_mode_button_size"
-                android:layout_height="@dimen/widget_mode_button_size"
+            <ImageView
+                android:id="@+id/widgetAlbumArt"
+                android:layout_width="@dimen/widget_albumart_size"
+                android:layout_height="@dimen/widget_albumart_size"
+                android:scaleType="centerCrop"
                 android:background="@drawable/bg_gray_rounded"
-                android:src="@drawable/earlybirds"
-                android:scaleType="centerInside"
-                android:layout_marginEnd="@dimen/widget_mode_button_margin_end" />
+                android:src="@drawable/group"
+                android:layout_marginEnd="@dimen/widget_albumart_margin_end" />
 
-            <ImageButton
-                android:id="@+id/btn_mode2"
-                android:layout_width="@dimen/widget_mode_button_size"
-                android:layout_height="@dimen/widget_mode_button_size"
-                android:background="@drawable/bg_gray_rounded"
-                android:src="@drawable/chime"
-                android:scaleType="centerInside"
-                android:layout_marginEnd="@dimen/widget_mode_button_margin_end" />
+            <TextView
+                android:id="@+id/widgetSongTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/widget_title_text_size"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
-            <ImageButton
-                android:id="@+id/btn_mode3"
-                android:layout_width="@dimen/widget_mode_button_size"
-                android:layout_height="@dimen/widget_mode_button_size"
-                android:background="@drawable/bg_gray_rounded"
-                android:src="@drawable/windchime"
-                android:scaleType="centerInside" />
+            <ImageView
+                android:id="@+id/btn_fav"
+                android:layout_width="@dimen/widget_fav_icon_size"
+                android:layout_height="@dimen/widget_fav_icon_size"
+                android:src="@drawable/heart"
+                android:layout_marginStart="@dimen/widget_fav_icon_margin_start" />
         </LinearLayout>
-    </FrameLayout>
-</layout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/widget_controls_margin_bottom">
+
+            <ImageView
+                android:id="@+id/btn_prev"
+                android:layout_width="@dimen/widget_icon_prev_next"
+                android:layout_height="@dimen/widget_icon_prev_next"
+                android:src="@drawable/prev"
+                android:layout_marginEnd="@dimen/widget_control_spacing" />
+
+            <ImageView
+                android:id="@+id/btn_play_pause"
+                android:layout_width="@dimen/widget_icon_play"
+                android:layout_height="@dimen/widget_icon_play"
+                android:src="@drawable/bigplay"
+                android:layout_marginEnd="@dimen/widget_control_spacing" />
+
+            <ImageView
+                android:id="@+id/btn_next"
+                android:layout_width="@dimen/widget_icon_prev_next"
+                android:layout_height="@dimen/widget_icon_prev_next"
+                android:src="@drawable/next" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/music_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/widget_progress_height"
+            android:max="100"
+            android:progress="40"
+            android:progressDrawable="@drawable/progress_drawable"
+            android:layout_marginBottom="@dimen/widget_progress_margin_bottom" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/mode_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="@dimen/widget_mode_button_margin_start"
+        android:layout_marginBottom="@dimen/widget_mode_button_margin_bottom"
+        android:padding="@dimen/widget_mode_button_padding">
+
+        <ImageButton
+            android:id="@+id/btn_mode1"
+            android:layout_width="@dimen/widget_mode_button_size"
+            android:layout_height="@dimen/widget_mode_button_size"
+            android:background="@drawable/bg_gray_rounded"
+            android:src="@drawable/earlybirds"
+            android:scaleType="centerInside"
+            android:layout_marginEnd="@dimen/widget_mode_button_margin_end" />
+
+        <ImageButton
+            android:id="@+id/btn_mode2"
+            android:layout_width="@dimen/widget_mode_button_size"
+            android:layout_height="@dimen/widget_mode_button_size"
+            android:background="@drawable/bg_gray_rounded"
+            android:src="@drawable/chime"
+            android:scaleType="centerInside"
+            android:layout_marginEnd="@dimen/widget_mode_button_margin_end" />
+
+        <ImageButton
+            android:id="@+id/btn_mode3"
+            android:layout_width="@dimen/widget_mode_button_size"
+            android:layout_height="@dimen/widget_mode_button_size"
+            android:background="@drawable/bg_gray_rounded"
+            android:src="@drawable/windchime"
+            android:scaleType="centerInside" />
+    </LinearLayout>
+</FrameLayout>
+
 
 
 

@@ -6,6 +6,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.service.MusicService
@@ -19,21 +21,20 @@ class CircleWidget : AppWidgetProvider() {
     }
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
-        for (id in ids) {
-            updateWidgetUI(context, manager, id)
-        }
+        ids.forEach { updateWidgetUI(context, manager, it) }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
+        val playerManager = PlayerManager.getInstance(context)
+        val song = playerManager.getCurrentData()
+
         when (intent.action) {
             ACTION_PLAY -> {
-                val playerManager = PlayerManager.getInstance(context)
                 playerManager.togglePlayback(playerManager.currentIndex)
             }
             ACTION_LIKE -> {
-                val playerManager = PlayerManager.getInstance(context)
-                playerManager.getCurrentData()?.let {
+                song?.let {
                     if (!MusicService.likedSongs.add(it.id)) {
                         MusicService.likedSongs.remove(it.id)
                     }
@@ -41,12 +42,12 @@ class CircleWidget : AppWidgetProvider() {
             }
         }
 
-        // Force widget UI update immediately
-        val manager = AppWidgetManager.getInstance(context)
-        val ids = manager.getAppWidgetIds(ComponentName(context, CircleWidget::class.java))
-        for (id in ids) {
-            updateWidgetUI(context, manager, id)
-        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            val manager = AppWidgetManager.getInstance(context)
+            val ids = manager.getAppWidgetIds(ComponentName(context, CircleWidget::class.java))
+            ids.forEach { updateWidgetUI(context, manager, it) }
+        }, 150)
     }
 
     private fun updateWidgetUI(context: Context, manager: AppWidgetManager, widgetId: Int) {

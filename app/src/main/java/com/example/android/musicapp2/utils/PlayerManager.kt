@@ -7,7 +7,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.android.musicapp2.model.DataModel
 
-class PlayerManager private constructor(context: Context) {
+class PlayerManager private constructor(private val context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
     private var playlist: List<DataModel> = emptyList()
@@ -45,8 +45,11 @@ class PlayerManager private constructor(context: Context) {
     fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
 
     fun play(index: Int) {
-        if (playlist.isEmpty()) return
+        if (playlist.isEmpty() || index !in playlist.indices) return
         currentIndex = index
+        val song = playlist[index]
+        PlayerStateManager.setCurrentSongTitle(context, song.name)
+        PlayerStateManager.setCurrentArtist(context, "Unknown Artist")
         player.seekTo(index, 0)
         player.playWhenReady = true
     }
@@ -101,6 +104,7 @@ class PlayerManager private constructor(context: Context) {
         }
     }
 }
+
 
 
 

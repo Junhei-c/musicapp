@@ -1,105 +1,102 @@
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/now_playing_widget_height"
+    android:layout_margin="@dimen/now_playing_widget_margin"
+    android:padding="@dimen/now_playing_widget_padding"
+    android:background="@drawable/widget_card_bg">
 
-    <RelativeLayout
-        android:id="@+id/widgetRoot"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/now_playing_widget_height"
-        android:layout_margin="@dimen/now_playing_widget_margin"
-        android:padding="@dimen/now_playing_widget_padding"
-        android:background="@drawable/widget_card_bg">
+    <ImageView
+        android:id="@+id/widgetAlbumArt"
+        android:layout_width="@dimen/now_playing_album_art_size"
+        android:layout_height="@dimen/now_playing_album_art_size"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/now_playing_album_art_margin_start"
+        android:layout_marginTop="@dimen/now_playing_album_art_margin_top"
+        android:src="@drawable/ic_launcher_foreground"
+        android:contentDescription="@string/song_icon" />
 
-        <ImageView
-            android:id="@+id/widgetAlbumArt"
-            android:layout_width="@dimen/now_playing_album_art_size"
-            android:layout_height="@dimen/now_playing_album_art_size"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="@dimen/now_playing_album_art_margin_start"
-            android:layout_marginTop="@dimen/now_playing_album_art_margin_top"
-            android:src="@drawable/ic_launcher_foreground"
-            android:contentDescription="@string/song_icon" />
+    <LinearLayout
+        android:id="@+id/textContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/widgetAlbumArt"
+        android:layout_marginStart="@dimen/now_playing_text_margin_start"
+        android:layout_marginTop="@dimen/now_playing_text_margin_top"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/textContainer"
+        <TextView
+            android:id="@+id/widgetSongTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/widgetAlbumArt"
-            android:layout_marginStart="@dimen/now_playing_text_margin_start"
-            android:layout_marginTop="@dimen/now_playing_text_margin_top"
-            android:orientation="vertical">
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/now_playing_song_title_size"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
-            <TextView
-                android:id="@+id/widgetSongTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/widget_song_title"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/now_playing_song_title_size"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widgetArtist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/now_playing_artist_margin_top"
-                android:text="@string/widget_artist"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/now_playing_artist_text_size"
-                android:maxLines="1"
-                android:ellipsize="end" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/widgetControls"
+        <TextView
+            android:id="@+id/widgetArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/now_playing_controls_margin_bottom"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/now_playing_artist_margin_top"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/now_playing_artist_text_size"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/widgetPrev"
-                android:layout_width="@dimen/now_playing_control_icon_size"
-                android:layout_height="@dimen/now_playing_control_icon_size"
-                android:background="@android:color/transparent"
-                android:src="@drawable/prev"
-                android:contentDescription="@string/widget_prev_desc" />
-
-            <ImageButton
-                android:id="@+id/widgetPlay"
-                android:layout_width="@dimen/now_playing_control_icon_size"
-                android:layout_height="@dimen/now_playing_control_icon_size"
-                android:background="@android:color/transparent"
-                android:src="@drawable/bigplay"
-                android:contentDescription="@string/widget_play_desc"
-                android:layout_marginStart="@dimen/now_playing_control_spacing"
-                android:layout_marginEnd="@dimen/now_playing_control_spacing" />
-
-            <ImageButton
-                android:id="@+id/widgetNext"
-                android:layout_width="@dimen/now_playing_control_icon_size"
-                android:layout_height="@dimen/now_playing_control_icon_size"
-                android:background="@android:color/transparent"
-                android:src="@drawable/next"
-                android:contentDescription="@string/widget_next_desc" />
-        </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widgetControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/now_playing_controls_margin_bottom"
+        android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/heart"
-            android:layout_width="@dimen/now_playing_heart_icon_size"
-            android:layout_height="@dimen/now_playing_heart_icon_size"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="@dimen/now_playing_album_art_margin_top"
-            android:layout_marginEnd="@dimen/now_playing_album_art_margin_start"
+            android:id="@+id/widgetPrev"
+            android:layout_width="@dimen/now_playing_control_icon_size"
+            android:layout_height="@dimen/now_playing_control_icon_size"
             android:background="@android:color/transparent"
-            android:src="@drawable/heart"
-            android:contentDescription="@string/widget_next_desc" />
+            android:src="@drawable/prev"
+            android:contentDescription="@string/widget_prev_desc" />
 
-    </RelativeLayout>
-</layout>
+        <ImageButton
+            android:id="@+id/widgetPlay"
+            android:layout_width="@dimen/now_playing_control_icon_size"
+            android:layout_height="@dimen/now_playing_control_icon_size"
+            android:background="@android:color/transparent"
+            android:src="@drawable/bigplay"
+            android:contentDescription="@string/widget_play_desc"
+            android:layout_marginStart="@dimen/now_playing_control_spacing"
+            android:layout_marginEnd="@dimen/now_playing_control_spacing" />
+
+        <ImageButton
+            android:id="@+id/widgetNext"
+            android:layout_width="@dimen/now_playing_control_icon_size"
+            android:layout_height="@dimen/now_playing_control_icon_size"
+            android:background="@android:color/transparent"
+            android:src="@drawable/next"
+            android:contentDescription="@string/widget_next_desc" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/heart"
+        android:layout_width="@dimen/now_playing_heart_icon_size"
+        android:layout_height="@dimen/now_playing_heart_icon_size"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/now_playing_album_art_margin_top"
+        android:layout_marginEnd="@dimen/now_playing_album_art_margin_start"
+        android:background="@android:color/transparent"
+        android:src="@drawable/heart"
+        android:contentDescription="@string/widget_next_desc" />
+</RelativeLayout>
+
 
 
 

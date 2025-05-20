@@ -24,7 +24,7 @@ import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var playerManager: PlayerManager
+    private var playerManager: PlayerManager? = null
     private lateinit var adapter: SongAdapter
 
     private val viewModel: MainViewModel by viewModels {
@@ -34,9 +34,11 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val progressUpdater = object : Runnable {
         override fun run() {
-            if (playerManager.isPlaying()) {
-                binding.progressBar.progress = playerManager.getPlaybackPercentage()
-                handler.postDelayed(this, 1000)
+            playerManager?.let {
+                if (it.isPlaying()) {
+                    binding.progressBar.progress = it.getPlaybackPercentage()
+                    handler.postDelayed(this, 1000)
+                }
             }
         }
     }
@@ -52,14 +54,15 @@ class MainActivity : AppCompatActivity() {
         viewModel.data.observe(this) { songs ->
             setupPlayer(songs)
             setupAdapter(songs)
-        }
 
-        binding.buttonPlayPause.setOnClickListener {
-            val index = playerManager.currentIndex
-            if (index != -1) {
-                playerManager.togglePlayback(index)
-                updateNowPlaying()
-                triggerWidgetUpdate()
+            binding.buttonPlayPause.setOnClickListener {
+                val manager = playerManager ?: return@setOnClickListener
+                val index = manager.currentIndex
+                if (index != -1) {
+                    manager.togglePlayback(index)
+                    updateNowPlaying()
+                    triggerWidgetUpdate()
+                }
             }
         }
 
@@ -75,22 +78,25 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    val newPosition = (playerManager.getDuration() * (progress / 100f)).toLong()
-                    playerManager.seekTo(newPosition)
+                    playerManager?.let {
+                        val newPosition = (it.getDuration() * (progress / 100f)).toLong()
+                        it.seekTo(newPosition)
+                    }
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
     }
 
     override fun onUserLeaveHint() {
-        if (playerManager.isPlaying() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val pipParams = PictureInPictureParams.Builder()
-                .setAspectRatio(Rational(16, 9))
-                .build()
-            enterPictureInPictureMode(pipParams)
+        playerManager?.let {
+            if (it.isPlaying() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val pipParams = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(pipParams)
+            }
         }
         super.onUserLeaveHint()
     }
@@ -121,20 +127,22 @@ class MainActivity : AppCompatActivity() {
         adapter = SongAdapter(
             songs = songs,
             onSongClick = { _, index ->
-                playerManager.togglePlayback(index)
+                playerManager?.togglePlayback(index)
                 updateNowPlaying()
                 triggerWidgetUpdate()
             },
             isItemPlaying = { index ->
-                index == playerManager.currentIndex && playerManager.isPlaying()
+                playerManager?.let {
+                    index == it.currentIndex && it.isPlaying()
+                } ?: false
             }
         )
         binding.recyclerViewSongs.adapter = adapter
     }
 
     private fun updateNowPlaying() {
-        val song = playerManager.getCurrentData()
-        val isPlaying = playerManager.isPlaying()
+        val song = playerManager?.getCurrentData()
+        val isPlaying = playerManager?.isPlaying() == true
 
         binding.textViewCurrentTitle.text = song?.name.orEmpty()
         song?.imageRes?.let { binding.imageViewNowPlayingIcon.setImageResource(it) }
@@ -143,20 +151,20 @@ class MainActivity : AppCompatActivity() {
             if (isPlaying) R.drawable.iconparkpauseone else R.drawable.iconparkplay
         )
 
-        binding.progressBar.progress = playerManager.getPlaybackPercentage()
+        binding.progressBar.progress = playerManager?.getPlaybackPercentage() ?: 0
     }
 
     private fun triggerWidgetUpdate() {
         val intent = Intent(this, MusicService::class.java).apply {
             action = "REFRESH_WIDGET"
         }
-        startService(intent)
+        ContextCompat.startForegroundService(this, intent)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(progressUpdater)
-        playerManager.release()
+        playerManager?.release()
     }
 }
 
