@@ -42,6 +42,21 @@ class PlayerManager private constructor(private val context: Context) {
         player.prepare()
     }
 
+    fun setVideoTestUrl(url: String) {
+        val testItem = MediaItem.Builder()
+            .setUri(url)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle("Test Video")
+                    .setArtist("Test Source")
+                    .build()
+            )
+            .build()
+        player.setMediaItem(testItem)
+        player.prepare()
+        player.playWhenReady = true
+    }
+
     fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
 
     fun play(index: Int) {
@@ -90,6 +105,8 @@ class PlayerManager private constructor(private val context: Context) {
         onPlaybackChanged = listener
     }
 
+    fun getExoPlayer(): ExoPlayer = player
+
     fun release() {
         player.release()
     }
@@ -104,6 +121,8 @@ class PlayerManager private constructor(private val context: Context) {
         }
     }
 }
+
+
 
 
 

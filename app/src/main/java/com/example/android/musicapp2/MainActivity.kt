@@ -21,6 +21,7 @@ import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -47,6 +48,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val exoPlayer = PlayerManager.getInstance(this).getExoPlayer()
+        binding.videoPlayerView.player = exoPlayer
+        exoPlayer.setMediaItem(androidx.media3.common.MediaItem.fromUri("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
+        exoPlayer.prepare()
+        exoPlayer.playWhenReady = true
 
         setupToolbar()
         setupRecyclerView()
@@ -167,6 +174,9 @@ class MainActivity : AppCompatActivity() {
         playerManager?.release()
     }
 }
+
+
+
 
 
 

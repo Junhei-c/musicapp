@@ -12,19 +12,19 @@ import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.utils.PlayerStateManager
 import com.example.android.musicapp2.widget.MyMusicWidget
-
+import com.example.android.musicapp2.widget.CircleWidget
 
 class MusicService : Service() {
+
     companion object {
         val likedSongs = mutableSetOf<Int>()
     }
 
-
     private lateinit var playerManager: PlayerManager
-    private val likedSongs = mutableSetOf<Int>()
     private var selectedMode = -1
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        initializeVideoPlayback()
         playerManager = PlayerManager.getInstance(this)
 
         when (intent?.action) {
@@ -47,7 +47,12 @@ class MusicService : Service() {
             "REFRESH_WIDGET" -> {}
         }
 
-        Handler(Looper.getMainLooper()).postDelayed({ updateAllWidgets() }, 100)
+        Handler(Looper.getMainLooper()).postDelayed({
+            updateAllWidgets()
+            updateCircleWidget()
+        }, 100)
+
+
         return START_NOT_STICKY
     }
 
@@ -66,7 +71,6 @@ class MusicService : Service() {
         val songTitle = PlayerStateManager.getCurrentSongTitle(this)
         val songArtist = PlayerStateManager.getCurrentArtist(this)
 
-
         ids.forEach { id ->
             val isExpanded = manager.getAppWidgetOptions(id)
                 .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
@@ -74,13 +78,12 @@ class MusicService : Service() {
             val views = RemoteViews(packageName, layoutId)
 
             views.setTextViewText(R.id.widgetSongTitle, songTitle)
-            if (layoutId == R.layout.widget_now_playing) {
+            if (!isExpanded) {
                 views.setTextViewText(R.id.widgetArtist, songArtist)
             }
-            if (song != null) {
-                views.setImageViewResource(R.id.widgetAlbumArt, song.imageRes)
+            song?.imageRes?.let {
+                views.setImageViewResource(R.id.widgetAlbumArt, it)
             }
-
 
             val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
             val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
@@ -112,8 +115,37 @@ class MusicService : Service() {
         }
     }
 
+    private fun updateCircleWidget() {
+        val manager = AppWidgetManager.getInstance(this)
+        val ids = manager.getAppWidgetIds(ComponentName(this, CircleWidget::class.java))
+        val song = playerManager.getCurrentData()
+        val isPlaying = playerManager.isPlaying()
+
+        ids.forEach { id ->
+            val views = RemoteViews(packageName, R.layout.widget_circle)
+            views.setImageViewResource(R.id.circle_album_art, song?.imageRes ?: R.drawable.earlybirds)
+            views.setImageViewResource(R.id.circle_play, if (isPlaying) R.drawable.pausebt else R.drawable.bigplay)
+            views.setImageViewResource(R.id.circle_like, if (song?.id != null && likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart)
+
+            views.setOnClickPendingIntent(R.id.circle_play, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_PLAY_PAUSE))
+            views.setOnClickPendingIntent(R.id.circle_like, MyMusicWidget.getPendingIntent(this, MyMusicWidget.ACTION_LIKE))
+
+            manager.updateAppWidget(id, views)
+        }
+    }
+
+    private fun initializeVideoPlayback() {
+        val player = PlayerManager.getInstance(this).getExoPlayer()
+        val mediaItem = androidx.media3.common.MediaItem.fromUri("https://samplelib.com/lib/preview/mp4/sample-5s.mp4")
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.playWhenReady = true
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
+
 
 
 
