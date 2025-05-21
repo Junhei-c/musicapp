@@ -11,6 +11,7 @@ import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.media3.common.MediaItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
@@ -20,7 +21,6 @@ import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,12 +49,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val exoPlayer = PlayerManager.getInstance(this).getExoPlayer()
-        binding.videoPlayerView.player = exoPlayer
-        exoPlayer.setMediaItem(androidx.media3.common.MediaItem.fromUri("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
-        exoPlayer.prepare()
-        exoPlayer.playWhenReady = true
-
         setupToolbar()
         setupRecyclerView()
 
@@ -75,6 +69,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.buttonEnterPip.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                val exoPlayer = PlayerManager.getInstance(this).getExoPlayer()
+                val mediaItem = MediaItem.fromUri(videoUrl)
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = true
+
                 val pipParams = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
                     .build()
@@ -174,6 +175,7 @@ class MainActivity : AppCompatActivity() {
         playerManager?.release()
     }
 }
+
 
 
 
