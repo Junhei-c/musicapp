@@ -13,6 +13,13 @@ class MainViewModel(
     private val _data = MutableLiveData<List<DataModel>>()
     val data: LiveData<List<DataModel>> get() = _data
 
+    private val _selectedMode = MutableLiveData<Int>().apply { value = -1 }
+    val selectedMode: LiveData<Int> get() = _selectedMode
+
+    fun setSelectedMode(mode: Int) {
+        _selectedMode.value = mode
+    }
+
     init {
         fetchData()
     }

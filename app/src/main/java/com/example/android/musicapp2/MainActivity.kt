@@ -18,6 +18,7 @@ import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
+import com.example.android.musicapp2.state.ModeStateManager
 import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
@@ -48,6 +49,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        ModeStateManager.syncFromLiveData(viewModel.selectedMode)
 
         setupToolbar()
         setupRecyclerView()
