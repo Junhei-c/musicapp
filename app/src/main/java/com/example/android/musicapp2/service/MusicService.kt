@@ -3,6 +3,7 @@ package com.example.android.musicapp2.service
 import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
@@ -10,9 +11,8 @@ import android.os.Looper
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.PlayerManager
-import com.example.android.musicapp2.utils.PlayerStateManager
-import com.example.android.musicapp2.widget.MyMusicWidget
 import com.example.android.musicapp2.widget.CircleWidget
+import com.example.android.musicapp2.widget.MyMusicWidget
 
 class MusicService : Service() {
 
@@ -47,11 +47,12 @@ class MusicService : Service() {
             "REFRESH_WIDGET" -> {}
         }
 
+        persistCurrentSong() // <--- Save current song info
+
         Handler(Looper.getMainLooper()).postDelayed({
             updateAllWidgets()
             updateCircleWidget()
         }, 100)
-
 
         return START_NOT_STICKY
     }
@@ -62,14 +63,28 @@ class MusicService : Service() {
         }
     }
 
+    private fun persistCurrentSong() {
+        playerManager.getCurrentData()?.let { song ->
+            val prefs = getSharedPreferences("music_prefs", Context.MODE_PRIVATE)
+            prefs.edit().apply {
+                putString("title", song.name)
+                putString("artist", "Unknown Artist")
+                putInt("id", song.id)
+                apply()
+            }
+        }
+    }
+
     private fun updateAllWidgets() {
         val manager = AppWidgetManager.getInstance(this)
         val ids = manager.getAppWidgetIds(ComponentName(this, MyMusicWidget::class.java))
         val song = playerManager.getCurrentData()
         val isPlaying = playerManager.isPlaying()
         val progress = playerManager.getPlaybackPercentage()
-        val songTitle = PlayerStateManager.getCurrentSongTitle(this)
-        val songArtist = PlayerStateManager.getCurrentArtist(this)
+        val songTitle = song?.name ?: "No Title"
+        val songArtist = "Unknown Artist"
+
+
 
         ids.forEach { id ->
             val isExpanded = manager.getAppWidgetOptions(id)
@@ -144,6 +159,7 @@ class MusicService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
 
 
 

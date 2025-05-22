@@ -46,11 +46,32 @@ class MyMusicWidget : AppWidgetProvider() {
         val options = manager.getAppWidgetOptions(id)
         val isExpanded = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) >= 150
         val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
-
         val views = RemoteViews(context.packageName, layoutId)
+
+
+        val prefs = context.getSharedPreferences("music_prefs", Context.MODE_PRIVATE)
+        val title = prefs.getString("title", "No Title")
+        val artist = prefs.getString("artist", "No Artist")
+
+        views.setTextViewText(R.id.widgetSongTitle, title)
+        if (!isExpanded) {
+            views.setTextViewText(R.id.widgetArtist, artist)
+        }
+
+
+        views.setImageViewResource(R.id.widgetAlbumArt, R.drawable.earlybirds)
+
+
+        val intent = Intent(context, MusicService::class.java).apply {
+            action = "REFRESH_WIDGET"
+        }
+        context.startService(intent)
+
         manager.updateAppWidget(id, views)
     }
 }
+
+
 
 
 
