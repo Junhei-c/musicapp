@@ -11,6 +11,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.controller.MusicController
+import com.example.android.musicapp2.state.ModeStateManager
 import com.example.android.musicapp2.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,14 +42,20 @@ class MusicService : Service() {
             com.example.android.musicapp2.widget.MyMusicWidget.ACTION_LIKE ->
                 toggleLike()
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE1 ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE1 -> {
                 MusicController.playByMode(this, 0)
+                ModeStateManager.selectedMode = 0
+            }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE2 ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE2 -> {
                 MusicController.playByMode(this, 1)
+                ModeStateManager.selectedMode = 1
+            }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE3 ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE3 -> {
                 MusicController.playByMode(this, 2)
+                ModeStateManager.selectedMode = 2
+            }
         }
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -104,6 +111,7 @@ class MusicService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
 
 
 

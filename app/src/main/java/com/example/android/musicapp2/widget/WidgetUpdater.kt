@@ -7,6 +7,7 @@ import android.widget.RemoteViews
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.controller.MusicController
 import com.example.android.musicapp2.service.MusicService
+import com.example.android.musicapp2.state.ModeStateManager
 
 object WidgetUpdater {
 
@@ -25,20 +26,23 @@ object WidgetUpdater {
             val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
             val views = RemoteViews(context.packageName, layoutId)
 
+            // Song info
             views.setTextViewText(R.id.widgetSongTitle, songTitle)
             if (!isExpanded) views.setTextViewText(R.id.widgetArtist, songArtist)
             song?.imageRes?.let { views.setImageViewResource(R.id.widgetAlbumArt, it) }
 
+            // Playback control visuals
             val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
             val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
             views.setImageViewResource(playId, playIcon)
             views.setProgressBar(R.id.music_progress, 100, progress, false)
 
+            // Like button
             val likeIcon = if (song?.id != null && MusicService.likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart
             val likeId = if (isExpanded) R.id.btn_fav else R.id.heart
             views.setImageViewResource(likeId, likeIcon)
 
-            // Set button intents
+            // Playback button intents
             views.setOnClickPendingIntent(playId, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_PLAY_PAUSE))
             views.setOnClickPendingIntent(
                 if (isExpanded) R.id.btn_next else R.id.widgetNext,
@@ -50,10 +54,20 @@ object WidgetUpdater {
             )
             views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_LIKE))
 
+            // Mode buttons (expanded only)
             if (isExpanded) {
+                val selectedMode = ModeStateManager.selectedMode
+
                 views.setOnClickPendingIntent(R.id.btn_mode1, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_MODE1))
                 views.setOnClickPendingIntent(R.id.btn_mode2, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_MODE2))
                 views.setOnClickPendingIntent(R.id.btn_mode3, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_MODE3))
+
+                views.setInt(R.id.btn_mode1, "setBackgroundResource",
+                    if (selectedMode == 0) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected)
+                views.setInt(R.id.btn_mode2, "setBackgroundResource",
+                    if (selectedMode == 1) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected)
+                views.setInt(R.id.btn_mode3, "setBackgroundResource",
+                    if (selectedMode == 2) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected)
             }
 
             manager.updateAppWidget(id, views)
@@ -70,7 +84,7 @@ object WidgetUpdater {
             val views = RemoteViews(context.packageName, R.layout.widget_circle)
             views.setImageViewResource(R.id.circle_album_art, song?.imageRes ?: R.drawable.earlybirds)
             views.setImageViewResource(R.id.circle_play, if (isPlaying) R.drawable.pausebt else R.drawable.bigplay)
-            views.setImageViewResource(R.id.circle_like, if (song?.id != null && MusicService.likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart)
+            views.setImageViewResource(R.id.circle_like, if (song?.id != null && MusicService.likedSongs.contains(song.id)) R.drawable.redheart else R.drawable.heart)
 
             views.setOnClickPendingIntent(R.id.circle_play, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_PLAY_PAUSE))
             views.setOnClickPendingIntent(R.id.circle_like, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_LIKE))

@@ -118,7 +118,7 @@
             android:layout_width="@dimen/widget_mode_button_size"
             android:layout_height="@dimen/widget_mode_button_size"
             android:background="@drawable/bg_gray_rounded"
-            android:src="@drawable/windchime"
+            android:src="@drawable/piano"
             android:scaleType="centerInside" />
     </LinearLayout>
 </FrameLayout>
