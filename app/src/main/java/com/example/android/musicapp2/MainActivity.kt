@@ -2,16 +2,20 @@ package com.example.android.musicapp2
 
 import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Rational
+import android.view.View
 import android.widget.SeekBar
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
@@ -26,8 +30,9 @@ import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private var playerManager: PlayerManager? = null
     private lateinit var adapter: SongAdapter
+    private lateinit var player: ExoPlayer
+    private var playerManager: PlayerManager? = null
 
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
@@ -50,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         ModeStateManager.syncFromLiveData(viewModel.selectedMode)
 
         setupToolbar()
@@ -59,62 +63,17 @@ class MainActivity : AppCompatActivity() {
         viewModel.data.observe(this) { songs ->
             setupPlayer(songs)
             setupAdapter(songs)
-
-            binding.buttonPlayPause.setOnClickListener {
-                val manager = playerManager ?: return@setOnClickListener
-                val index = manager.currentIndex
-                if (index != -1) {
-                    manager.togglePlayback(index)
-                    updateNowPlaying()
-                    triggerWidgetUpdate()
-                }
-            }
+            setupPlaybackControls()
         }
 
-        binding.buttonEnterPip.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                val exoPlayer = PlayerManager.getInstance(this).getExoPlayer()
-                val mediaItem = MediaItem.fromUri(videoUrl)
-                exoPlayer.setMediaItem(mediaItem)
-                exoPlayer.prepare()
-                exoPlayer.playWhenReady = true
-
-                val pipParams = PictureInPictureParams.Builder()
-                    .setAspectRatio(Rational(16, 9))
-                    .build()
-                enterPictureInPictureMode(pipParams)
-            }
-        }
-
-        binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    playerManager?.let {
-                        val newPosition = (it.getDuration() * (progress / 100f)).toLong()
-                        it.seekTo(newPosition)
-                    }
-                }
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-    }
-
-    override fun onUserLeaveHint() {
-        playerManager?.let {
-            if (it.isPlaying() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val pipParams = PictureInPictureParams.Builder()
-                    .setAspectRatio(Rational(16, 9))
-                    .build()
-                enterPictureInPictureMode(pipParams)
-            }
-        }
-        super.onUserLeaveHint()
+        setupSeekBar()
+        setupPipButton()
     }
 
     private fun setupToolbar() {
+        @Suppress("DEPRECATION")
         setSupportActionBar(binding.toolbar)
+        @Suppress("DEPRECATION")
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
     }
 
@@ -127,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             setPlaylist(songs)
             setOnPlaybackChangedListener {
                 updateNowPlaying()
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemChanged(currentIndex)
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)
                 triggerWidgetUpdate()
@@ -152,6 +111,57 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerViewSongs.adapter = adapter
     }
 
+    private fun setupPlaybackControls() {
+        binding.buttonPlayPause.setOnClickListener {
+            playerManager?.let {
+                val index = it.currentIndex
+                if (index != -1) {
+                    it.togglePlayback(index)
+                    updateNowPlaying()
+                    triggerWidgetUpdate()
+                }
+            }
+        }
+    }
+
+    private fun setupSeekBar() {
+        binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    playerManager?.let {
+                        val newPosition = (it.getDuration() * (progress / 100f)).toLong()
+                        it.seekTo(newPosition)
+                    }
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+    }
+
+    private fun setupPipButton() {
+        binding.buttonEnterPip.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                player = ExoPlayer.Builder(this).build().also {
+                    it.setMediaItem(MediaItem.fromUri(videoUrl))
+                    it.prepare()
+                    it.playWhenReady = true
+                }
+
+
+                binding.pipPlayerView.visibility = View.VISIBLE
+                binding.pipPlayerView.player = player
+
+                val pipParams = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(pipParams)
+            }
+        }
+    }
+
+
     private fun updateNowPlaying() {
         val song = playerManager?.getCurrentData()
         val isPlaying = playerManager?.isPlaying() == true
@@ -173,38 +183,29 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.startForegroundService(this, intent)
     }
 
+    override fun onUserLeaveHint() {
+        playerManager?.let {
+            if (it.isPlaying() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val pipParams = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(pipParams)
+            }
+        }
+        super.onUserLeaveHint()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        binding.toolbar.visibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
+        binding.recyclerViewSongs.visibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(progressUpdater)
         playerManager?.release()
+        if (::player.isInitialized) player.release()
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

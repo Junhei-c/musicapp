@@ -59,7 +59,6 @@ class MusicService : Service() {
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            persistCurrentSong()
             withContext(Dispatchers.Main) {
                 WidgetUpdater.updateStandard(this@MusicService)
                 WidgetUpdater.updateCircle(this@MusicService)
@@ -97,22 +96,8 @@ class MusicService : Service() {
         }
     }
 
-    private fun persistCurrentSong() {
-        MusicController.getCurrentSong(this)?.let { song ->
-            val prefs = getSharedPreferences("music_prefs", Context.MODE_PRIVATE)
-            prefs.edit().apply {
-                putString("title", song.name)
-                putString("artist", "Unknown Artist")
-                putInt("id", song.id)
-                apply()
-            }
-        }
-    }
-
     override fun onBind(intent: Intent?): IBinder? = null
 }
-
-
 
 
 
