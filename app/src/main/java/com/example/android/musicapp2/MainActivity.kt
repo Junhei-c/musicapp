@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: SongAdapter
     private lateinit var player: ExoPlayer
     private var playerManager: PlayerManager? = null
+    private var lastPlayingIndex: Int = -1
 
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
@@ -71,22 +72,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        @Suppress("DEPRECATION")
         setSupportActionBar(binding.toolbar)
-        @Suppress("DEPRECATION")
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
     }
 
     private fun setupRecyclerView() {
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
+        binding.recyclerViewSongs.setHasFixedSize(true)
     }
 
     private fun setupPlayer(songs: List<DataModel>) {
         playerManager = PlayerManager.getInstance(this).apply {
             setPlaylist(songs)
             setOnPlaybackChangedListener {
+                val previousIndex = lastPlayingIndex
+                lastPlayingIndex = currentIndex
+
                 updateNowPlaying()
-                adapter.notifyItemChanged(currentIndex)
+                if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
+                if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
+
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)
                 triggerWidgetUpdate()
@@ -149,7 +154,6 @@ class MainActivity : AppCompatActivity() {
                     it.playWhenReady = true
                 }
 
-
                 binding.pipPlayerView.visibility = View.VISIBLE
                 binding.pipPlayerView.player = player
 
@@ -160,7 +164,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun updateNowPlaying() {
         val song = playerManager?.getCurrentData()

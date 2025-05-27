@@ -31,16 +31,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
+
             <androidx.media3.ui.PlayerView
                 android:id="@+id/pipPlayerView"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="match_parent"
                 android:visibility="gone"
-                app:use_controller="true"
-                app:show_timeout="0"
-                />
-
-
+                app:use_controller="false"/>
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
