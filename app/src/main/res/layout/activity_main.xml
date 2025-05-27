@@ -31,7 +31,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-
             <androidx.media3.ui.PlayerView
                 android:id="@+id/pipPlayerView"
                 android:layout_width="match_parent"

@@ -154,11 +154,16 @@ class MainActivity : AppCompatActivity() {
                     it.playWhenReady = true
                 }
 
+                binding.pipPlayerView.player = player
+                binding.pipPlayerView.visibility = View.VISIBLE
+
                 binding.toolbar.visibility = View.GONE
                 binding.recyclerViewSongs.visibility = View.GONE
-                binding.pipPlayerView.visibility = View.VISIBLE
-                binding.pipPlayerView.player = player
-
+                binding.textViewCurrentTitle.visibility = View.GONE
+                binding.imageViewNowPlayingIcon.visibility = View.GONE
+                binding.buttonPlayPause.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
+                binding.buttonEnterPip.visibility = View.GONE
 
                 val pipParams = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
@@ -204,18 +209,9 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-
-        if (isInPictureInPictureMode) {
-            binding.toolbar.visibility = View.GONE
-            binding.recyclerViewSongs.visibility = View.GONE
-            binding.pipPlayerView.visibility = View.VISIBLE
-        } else {
-            binding.toolbar.visibility = View.VISIBLE
-            binding.recyclerViewSongs.visibility = View.VISIBLE
-            binding.pipPlayerView.visibility = View.GONE
-        }
+        binding.toolbar.visibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
+        binding.recyclerViewSongs.visibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
