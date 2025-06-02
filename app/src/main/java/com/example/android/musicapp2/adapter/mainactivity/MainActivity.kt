@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.adapter.SongAdapter
@@ -26,6 +27,7 @@ import com.example.android.musicapp2.utils.PlayerManager
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 
+@androidx.media3.common.util.UnstableApi
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
+        // Kotlin-style setter; Java deprecation warning can be ignored
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
     }
 
@@ -85,6 +88,7 @@ class MainActivity : AppCompatActivity() {
                 lastPlayingIndex = currentIndex
 
                 updateNowPlaying()
+
                 if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
                 if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
 
@@ -105,9 +109,7 @@ class MainActivity : AppCompatActivity() {
                 triggerWidgetUpdate()
             },
             isItemPlaying = { index ->
-                playerManager?.let {
-                    index == it.currentIndex && it.isPlaying()
-                } ?: false
+                playerManager?.let { index == it.currentIndex && it.isPlaying() } ?: false
             }
         )
         binding.recyclerViewSongs.adapter = adapter
@@ -115,13 +117,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupPlaybackControls() {
         binding.buttonPlayPause.setOnClickListener {
-            playerManager?.let {
-                val index = it.currentIndex
-                if (index != -1) {
-                    it.togglePlayback(index)
-                    updateNowPlaying()
-                    triggerWidgetUpdate()
-                }
+            playerManager?.currentIndex?.takeIf { it != -1 }?.let {
+                playerManager?.togglePlayback(it)
+                updateNowPlaying()
+                triggerWidgetUpdate()
             }
         }
     }
@@ -130,12 +129,11 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    playerManager?.let {
-                        val newPosition = (it.getDuration() * (progress / 100f)).toLong()
-                        it.seekTo(newPosition)
-                    }
+                    val duration = playerManager?.getDuration() ?: 0L
+                    playerManager?.seekTo((duration * (progress / 100f)).toLong())
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
@@ -151,8 +149,11 @@ class MainActivity : AppCompatActivity() {
                     playWhenReady = true
                 }
 
-                binding.pipPlayerView.player = player
-                binding.pipPlayerView.visibility = View.VISIBLE
+                binding.pipPlayerView.apply {
+                    this.player = this@MainActivity.player
+                    setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL)
+                    visibility = View.VISIBLE
+                }
 
                 listOf(
                     binding.toolbar,
@@ -212,3 +213,4 @@ class MainActivity : AppCompatActivity() {
         if (::player.isInitialized) player.release()
     }
 }
+
