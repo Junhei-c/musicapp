@@ -1,119 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
-    <data />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryVariant"
+        android:title="@string/toolbar_title"
+        android:titleTextColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/nowPlayingCard"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/now_playing_height"
+        app:cardBackgroundColor="@color/widget_highlight"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="@dimen/card_elevation"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryVariant"
-            android:title="@string/toolbar_title"
-            android:titleTextColor="@color/white"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/content_padding">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/nowPlayingCard"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/now_playing_height"
-            app:cardBackgroundColor="@color/widget_highlight"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="@dimen/card_elevation"
-            app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
+            <!-- Hidden PiP Player -->
             <androidx.media3.ui.PlayerView
                 android:id="@+id/pipPlayerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
                 android:visibility="gone"
-                app:use_controller="false"/>
+                app:use_controller="false"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <TextView
+                android:id="@+id/textViewCurrentTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/default_title"
+                android:textColor="@color/black"
+                android:textSize="@dimen/song_title_size"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="@dimen/content_padding">
+            <ImageView
+                android:id="@+id/imageViewNowPlayingIcon"
+                android:layout_width="@dimen/image_size"
+                android:layout_height="@dimen/image_size"
+                android:contentDescription="@string/now_playing_icon"
+                android:src="@drawable/ic_launcher_foreground"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-                <TextView
-                    android:id="@+id/textViewCurrentTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/default_title"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/song_title_size"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+            <ImageButton
+                android:id="@+id/buttonPlayPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/play"
+                android:contentDescription="@string/play_pause_button_desc"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
-                <ImageView
-                    android:id="@+id/imageViewNowPlayingIcon"
-                    android:layout_width="@dimen/image_size"
-                    android:layout_height="@dimen/image_size"
-                    android:contentDescription="@string/now_playing_icon"
-                    android:src="@drawable/ic_launcher_foreground"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+            <SeekBar
+                android:id="@+id/progressBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="0"
+                android:layout_marginTop="@dimen/spacing_small"
+                app:layout_constraintTop_toBottomOf="@id/textViewCurrentTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-                <ImageButton
-                    android:id="@+id/buttonPlayPause"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/play"
-                    android:contentDescription="@string/play_pause_button_desc"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+            <ImageButton
+                android:id="@+id/buttonEnterPip"
+                android:layout_width="@dimen/pip_button_size"
+                android:layout_height="@dimen/pip_button_size"
+                android:layout_marginStart="@dimen/margin_xsmall"
+                android:layout_marginBottom="@dimen/margin_xsmall"
+                android:src="@drawable/pip"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/enter_pip"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
-                <SeekBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:max="100"
-                    android:progress="0"
-                    android:layout_marginTop="@dimen/spacing_small"
-                    app:layout_constraintTop_toBottomOf="@id/textViewCurrentTitle"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
-                <ImageButton
-                    android:id="@+id/buttonEnterPip"
-                    android:layout_width="@dimen/pip_button_size"
-                    android:layout_height="@dimen/pip_button_size"
-                    android:layout_marginStart="@dimen/margin_xsmall"
-                    android:layout_marginBottom="@dimen/margin_xsmall"
-                    android:src="@drawable/pip"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/enter_pip"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewSongs"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_small"
+        app:layout_constraintTop_toBottomOf="@id/nowPlayingCard"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewSongs"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/spacing_small"
-            app:layout_constraintTop_toBottomOf="@id/nowPlayingCard"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</layout>
 
 
 

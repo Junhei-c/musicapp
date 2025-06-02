@@ -28,4 +28,3 @@ object MusicController {
 
     fun getProgress(context: Context) = PlayerManager.getInstance(context).getPlaybackPercentage()
 }
-

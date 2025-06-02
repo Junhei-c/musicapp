@@ -1,8 +1,7 @@
-package com.example.android.musicapp2
+package com.example.android.musicapp2.adapter.mainactivity
 
 import android.app.PictureInPictureParams
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -11,12 +10,12 @@ import android.util.Rational
 import android.view.View
 import android.widget.SeekBar
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.android.musicapp2.R
 import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
@@ -42,11 +41,9 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val progressUpdater = object : Runnable {
         override fun run() {
-            playerManager?.let {
-                if (it.isPlaying()) {
-                    binding.progressBar.progress = it.getPlaybackPercentage()
-                    handler.postDelayed(this, 1000)
-                }
+            playerManager?.takeIf { it.isPlaying() }?.let {
+                binding.progressBar.progress = it.getPlaybackPercentage()
+                handler.postDelayed(this, 1000)
             }
         }
     }
@@ -60,15 +57,14 @@ class MainActivity : AppCompatActivity() {
 
         setupToolbar()
         setupRecyclerView()
+        setupSeekBar()
+        setupPipButton()
 
         viewModel.data.observe(this) { songs ->
             setupPlayer(songs)
             setupAdapter(songs)
             setupPlaybackControls()
         }
-
-        setupSeekBar()
-        setupPipButton()
     }
 
     private fun setupToolbar() {
@@ -76,9 +72,9 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
     }
 
-    private fun setupRecyclerView() {
-        binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
-        binding.recyclerViewSongs.setHasFixedSize(true)
+    private fun setupRecyclerView() = with(binding.recyclerViewSongs) {
+        layoutManager = LinearLayoutManager(this@MainActivity)
+        setHasFixedSize(true)
     }
 
     private fun setupPlayer(songs: List<DataModel>) {
@@ -94,6 +90,7 @@ class MainActivity : AppCompatActivity() {
 
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)
+
                 triggerWidgetUpdate()
             }
         }
@@ -148,27 +145,30 @@ class MainActivity : AppCompatActivity() {
         binding.buttonEnterPip.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                player = ExoPlayer.Builder(this).build().also {
-                    it.setMediaItem(MediaItem.fromUri(videoUrl))
-                    it.prepare()
-                    it.playWhenReady = true
+                player = ExoPlayer.Builder(this).build().apply {
+                    setMediaItem(MediaItem.fromUri(videoUrl))
+                    prepare()
+                    playWhenReady = true
                 }
 
                 binding.pipPlayerView.player = player
                 binding.pipPlayerView.visibility = View.VISIBLE
 
-                binding.toolbar.visibility = View.GONE
-                binding.recyclerViewSongs.visibility = View.GONE
-                binding.textViewCurrentTitle.visibility = View.GONE
-                binding.imageViewNowPlayingIcon.visibility = View.GONE
-                binding.buttonPlayPause.visibility = View.GONE
-                binding.progressBar.visibility = View.GONE
-                binding.buttonEnterPip.visibility = View.GONE
+                listOf(
+                    binding.toolbar,
+                    binding.recyclerViewSongs,
+                    binding.textViewCurrentTitle,
+                    binding.imageViewNowPlayingIcon,
+                    binding.buttonPlayPause,
+                    binding.progressBar,
+                    binding.buttonEnterPip
+                ).forEach { it.visibility = View.GONE }
 
-                val pipParams = PictureInPictureParams.Builder()
-                    .setAspectRatio(Rational(16, 9))
-                    .build()
-                enterPictureInPictureMode(pipParams)
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(16, 9))
+                        .build()
+                )
             }
         }
     }
@@ -195,22 +195,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onUserLeaveHint() {
-        playerManager?.let {
-            if (it.isPlaying() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val pipParams = PictureInPictureParams.Builder()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && playerManager?.isPlaying() == true) {
+            enterPictureInPictureMode(
+                PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
                     .build()
-                enterPictureInPictureMode(pipParams)
-            }
+            )
         }
         super.onUserLeaveHint()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        binding.toolbar.visibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
-        binding.recyclerViewSongs.visibility = if (isInPictureInPictureMode) View.GONE else View.VISIBLE
     }
 
     override fun onDestroy() {

@@ -27,18 +27,7 @@ class PlayerManager private constructor(private val context: Context) {
 
     fun setPlaylist(data: List<DataModel>) {
         playlist = data
-        val mediaItems = data.map {
-            MediaItem.Builder()
-                .setUri(it.url)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(it.name)
-                        .setArtist("Unknown Artist")
-                        .build()
-                )
-                .build()
-        }
-        player.setMediaItems(mediaItems)
+        player.setMediaItems(data.map { it.toMediaItem() })
         player.prepare()
     }
 
@@ -60,13 +49,14 @@ class PlayerManager private constructor(private val context: Context) {
     fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
 
     fun play(index: Int) {
-        if (playlist.isEmpty() || index !in playlist.indices) return
-        currentIndex = index
-        val song = playlist[index]
-        PlayerStateManager.setCurrentSongTitle(context, song.name)
-        PlayerStateManager.setCurrentArtist(context, "Unknown Artist")
-        player.seekTo(index, 0)
-        player.playWhenReady = true
+        if (index in playlist.indices) {
+            currentIndex = index
+            val song = playlist[index]
+            PlayerStateManager.setCurrentSongTitle(context, song.name)
+            PlayerStateManager.setCurrentArtist(context, "Unknown Artist")
+            player.seekTo(index, 0)
+            player.playWhenReady = true
+        }
     }
 
     fun pause() {
@@ -74,8 +64,7 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun togglePlayback(index: Int) {
-        if (currentIndex == index && player.isPlaying) pause()
-        else play(index)
+        if (currentIndex == index && player.isPlaying) pause() else play(index)
     }
 
     fun playNext() {
@@ -112,7 +101,8 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     companion object {
-        @Volatile private var instance: PlayerManager? = null
+        @Volatile
+        private var instance: PlayerManager? = null
 
         fun getInstance(context: Context): PlayerManager {
             return instance ?: synchronized(this) {
@@ -120,10 +110,23 @@ class PlayerManager private constructor(private val context: Context) {
             }
         }
     }
+
+    private fun DataModel.toMediaItem(): MediaItem {
+        val metadataBuilder = MediaMetadata.Builder()
+            .setTitle(this.name)
+            .setArtist("Unknown Artist")
+
+        val mediaItemBuilder = MediaItem.Builder()
+            .setUri(this.url)
+            .setMediaMetadata(metadataBuilder.build())
+
+        if (this.mediaType.name == "VIDEO") {
+            mediaItemBuilder.setTag("VIDEO")
+        }
+
+        return mediaItemBuilder.build()
+    }
 }
-
-
-
 
 
 

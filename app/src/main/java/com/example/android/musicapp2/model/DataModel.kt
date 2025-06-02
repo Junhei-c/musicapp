@@ -4,7 +4,8 @@ data class DataModel(
     val id: Int,
     val name: String,
     val url: String,
-    val imageRes: Int
+    val imageRes: Int,
+    val mediaType: MediaTypeEnum = MediaTypeEnum.AUDIO
 )
 
 
