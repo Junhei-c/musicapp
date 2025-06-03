@@ -11,20 +11,16 @@ class MainViewModel(
 ) : ViewModel() {
 
     private val _data = MutableLiveData<List<DataModel>>()
-    val data: LiveData<List<DataModel>> get() = _data
+    val data: LiveData<List<DataModel>> = _data
 
-    private val _selectedMode = MutableLiveData<Int>().apply { value = -1 }
-    val selectedMode: LiveData<Int> get() = _selectedMode
+    private val _selectedMode = MutableLiveData(-1)
+    val selectedMode: LiveData<Int> = _selectedMode
+
+    init {
+        _data.value = repository.getMediaList()
+    }
 
     fun setSelectedMode(mode: Int) {
         _selectedMode.value = mode
-    }
-
-    init {
-        fetchData()
-    }
-
-    private fun fetchData() {
-        _data.value = repository.getData()
     }
 }

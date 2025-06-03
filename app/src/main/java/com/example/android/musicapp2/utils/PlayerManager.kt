@@ -31,29 +31,14 @@ class PlayerManager private constructor(private val context: Context) {
         player.prepare()
     }
 
-    fun setVideoTestUrl(url: String) {
-        val testItem = MediaItem.Builder()
-            .setUri(url)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle("Test Video")
-                    .setArtist("Test Source")
-                    .build()
-            )
-            .build()
-        player.setMediaItem(testItem)
-        player.prepare()
-        player.playWhenReady = true
-    }
-
-    fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
-
     fun play(index: Int) {
         if (index in playlist.indices) {
             currentIndex = index
-            val song = playlist[index]
-            PlayerStateManager.setCurrentSongTitle(context, song.name)
+            val media = playlist[index]
+
+            PlayerStateManager.setCurrentSongTitle(context, media.name)
             PlayerStateManager.setCurrentArtist(context, "Unknown Artist")
+
             player.seekTo(index, 0)
             player.playWhenReady = true
         }
@@ -64,11 +49,21 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun togglePlayback(index: Int) {
-        if (currentIndex == index && player.isPlaying) pause() else play(index)
+        if (currentIndex == index && player.isPlaying) {
+            pause()
+            onPlaybackChanged?.invoke()
+        } else {
+            play(index)
+            onPlaybackChanged?.invoke()
+        }
     }
 
+
     fun playNext() {
-        if (playlist.isNotEmpty()) play((currentIndex + 1) % playlist.size)
+        if (playlist.isNotEmpty()) {
+            val nextIndex = (currentIndex + 1) % playlist.size
+            play(nextIndex)
+        }
     }
 
     fun playPrevious() {
@@ -90,6 +85,8 @@ class PlayerManager private constructor(private val context: Context) {
     fun getCurrentPosition(): Long = player.currentPosition
     fun seekTo(positionMs: Long) = player.seekTo(positionMs)
 
+    fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
+
     fun setOnPlaybackChangedListener(listener: () -> Unit) {
         onPlaybackChanged = listener
     }
@@ -100,38 +97,29 @@ class PlayerManager private constructor(private val context: Context) {
         player.release()
     }
 
+    private fun DataModel.toMediaItem(): MediaItem {
+        val metadata = MediaMetadata.Builder()
+            .setTitle(this.name)
+            .setArtist("Unknown Artist")
+            .build()
+
+        return MediaItem.Builder()
+            .setUri(this.url)
+            .setMediaMetadata(metadata)
+            .setTag(this.mediaType)
+            .build()
+    }
+
     companion object {
         @Volatile
         private var instance: PlayerManager? = null
 
-        fun getInstance(context: Context): PlayerManager {
-            return instance ?: synchronized(this) {
+        fun getInstance(context: Context): PlayerManager =
+            instance ?: synchronized(this) {
                 instance ?: PlayerManager(context.applicationContext).also { instance = it }
             }
-        }
-    }
-
-    private fun DataModel.toMediaItem(): MediaItem {
-        val metadataBuilder = MediaMetadata.Builder()
-            .setTitle(this.name)
-            .setArtist("Unknown Artist")
-
-        val mediaItemBuilder = MediaItem.Builder()
-            .setUri(this.url)
-            .setMediaMetadata(metadataBuilder.build())
-
-        if (this.mediaType.name == "VIDEO") {
-            mediaItemBuilder.setTag("VIDEO")
-        }
-
-        return mediaItemBuilder.build()
     }
 }
-
-
-
-
-
 
 
 

@@ -213,4 +213,3 @@ class MainActivity : AppCompatActivity() {
         if (::player.isInitialized) player.release()
     }
 }
-

@@ -57,6 +57,3 @@ class SongAdapter(
 
     override fun getItemCount(): Int = songs.size
 }
-
-
-
