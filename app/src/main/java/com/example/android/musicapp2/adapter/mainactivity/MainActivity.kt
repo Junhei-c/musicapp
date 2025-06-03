@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity() {
             onSongClick = { _, index ->
                 val previousIndex = playerManager?.currentIndex ?: -1
                 playerManager?.togglePlayback(index)
+
                 updateNowPlaying()
                 triggerWidgetUpdate()
 
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         )
         binding.recyclerViewSongs.adapter = adapter
     }
+
 
     private fun setupPlaybackControls() {
         binding.buttonPlayPause.setOnClickListener {
