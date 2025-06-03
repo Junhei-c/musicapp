@@ -1,10 +1,8 @@
 package com.example.android.musicapp2.adapter
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ItemSongBinding
@@ -19,29 +17,32 @@ class SongAdapter(
     inner class SongViewHolder(private val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(song: DataModel, position: Int) {
-            val context = binding.root.context
+        fun bind(song: DataModel) {
+            val position = bindingAdapterPosition
+            if (position == RecyclerView.NO_POSITION) return
+
             val isPlaying = isItemPlaying(position)
 
             binding.textViewSongName.text = song.name
+
             binding.imageViewIcon.apply {
                 visibility = if (isPlaying) View.VISIBLE else View.INVISIBLE
-                if (isPlaying) setImageResource(R.drawable.group)
+                setImageResource(R.drawable.group)
             }
 
             binding.buttonPlay.setImageResource(
                 if (isPlaying) R.drawable.pause else R.drawable.play
             )
 
-            binding.cardViewItem.setCardBackgroundColor(
-                if (isPlaying)
-                    Color.parseColor("#43CCF8")
-                else
-                    ContextCompat.getColor(context, R.color.white)
+            binding.cardViewItem.setBackgroundResource(
+                if (isPlaying) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected
             )
 
             binding.buttonPlay.setOnClickListener {
-                onSongClick(song, position)
+                val safePos = bindingAdapterPosition
+                if (safePos != RecyclerView.NO_POSITION) {
+                    onSongClick(song, safePos)
+                }
             }
         }
     }
@@ -52,7 +53,7 @@ class SongAdapter(
     }
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-        holder.bind(songs[position], position)
+        holder.bind(songs[position])
     }
 
     override fun getItemCount(): Int = songs.size

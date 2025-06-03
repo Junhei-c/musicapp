@@ -71,7 +71,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
-        // Kotlin-style setter; Java deprecation warning can be ignored
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
     }
 
@@ -104,9 +103,13 @@ class MainActivity : AppCompatActivity() {
         adapter = SongAdapter(
             songs = songs,
             onSongClick = { _, index ->
+                val previousIndex = playerManager?.currentIndex ?: -1
                 playerManager?.togglePlayback(index)
                 updateNowPlaying()
                 triggerWidgetUpdate()
+
+                if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
+                adapter.notifyItemChanged(index)
             },
             isItemPlaying = { index ->
                 playerManager?.let { index == it.currentIndex && it.isPlaying() } ?: false
@@ -121,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                 playerManager?.togglePlayback(it)
                 updateNowPlaying()
                 triggerWidgetUpdate()
+                adapter.notifyItemChanged(it)
             }
         }
     }
@@ -129,8 +133,7 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    val duration = playerManager?.getDuration() ?: 0L
-                    playerManager?.seekTo((duration * (progress / 100f)).toLong())
+                    playerManager?.seekTo((playerManager?.getDuration() ?: 0L) * (progress / 100f).toLong())
                 }
             }
 

@@ -34,18 +34,24 @@ class PlayerManager private constructor(private val context: Context) {
     fun play(index: Int) {
         if (index in playlist.indices) {
             currentIndex = index
-            val media = playlist[index]
 
+            val media = playlist[index]
             PlayerStateManager.setCurrentSongTitle(context, media.name)
             PlayerStateManager.setCurrentArtist(context, "Unknown Artist")
 
-            player.seekTo(index, 0)
+            if (player.currentMediaItemIndex != index) {
+                player.seekTo(index, 0)
+            }
             player.playWhenReady = true
+
+            onPlaybackChanged?.invoke()
         }
     }
 
+
     fun pause() {
         player.playWhenReady = false
+        onPlaybackChanged?.invoke()
     }
 
     fun togglePlayback(index: Int) {
@@ -120,7 +126,5 @@ class PlayerManager private constructor(private val context: Context) {
             }
     }
 }
-
-
 
 

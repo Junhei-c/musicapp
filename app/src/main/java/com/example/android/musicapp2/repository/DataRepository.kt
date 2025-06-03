@@ -12,21 +12,21 @@ class DataRepository {
                 id = 1,
                 name = "Lo-FI Chime",
                 url = "https://your-audio-url.com/lofi.mp3",
-                imageRes = R.drawable.group,
+                imageRes = R.drawable.chime,
                 mediaType = MediaTypeEnum.AUDIO
             ),
             DataModel(
                 id = 2,
                 name = "Synth Key",
                 url = "https://your-audio-url.com/synth.mp3",
-                imageRes = R.drawable.group,
+                imageRes = R.drawable.bigpiano,
                 mediaType = MediaTypeEnum.AUDIO
             ),
             DataModel(
                 id = 3,
                 name = "Dream Tone",
                 url = "https://your-audio-url.com/dream.mp3",
-                imageRes = R.drawable.group,
+                imageRes = R.drawable.earlybirds,
                 mediaType = MediaTypeEnum.AUDIO
             ),
             DataModel(

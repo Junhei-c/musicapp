@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.controller.MusicController
@@ -27,34 +28,51 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("MusicService", "Service started with intent: ${intent?.action}")
         startAsForegroundService()
 
         when (intent?.action) {
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_PLAY_PAUSE ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_PLAY_PAUSE -> {
+                Log.d("MusicService", "ACTION_PLAY_PAUSE received")
                 MusicController.togglePlayback(this)
+            }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_NEXT ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_NEXT -> {
+                Log.d("MusicService", "ACTION_NEXT received")
                 MusicController.playNext(this)
+            }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_PREV ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_PREV -> {
+                Log.d("MusicService", "ACTION_PREV received")
                 MusicController.playPrevious(this)
+            }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_LIKE ->
+            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_LIKE -> {
+                Log.d("MusicService", "ACTION_LIKE received")
                 toggleLike()
+            }
 
             com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE1 -> {
+                Log.d("MusicService", "ACTION_MODE1 received")
                 MusicController.playByMode(this, 0)
                 ModeStateManager.selectedMode = 0
             }
 
             com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE2 -> {
+                Log.d("MusicService", "ACTION_MODE2 received")
                 MusicController.playByMode(this, 1)
                 ModeStateManager.selectedMode = 1
             }
 
             com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE3 -> {
+                Log.d("MusicService", "ACTION_MODE3 received")
                 MusicController.playByMode(this, 2)
                 ModeStateManager.selectedMode = 2
+            }
+
+            "REFRESH_WIDGET" -> {
+                Log.d("MusicService", "REFRESH_WIDGET received")
+                // Let it fall through to widget update below
             }
         }
 
