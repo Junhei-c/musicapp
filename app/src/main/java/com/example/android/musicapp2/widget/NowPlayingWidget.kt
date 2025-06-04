@@ -9,7 +9,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
-import com.example.android.musicapp2.utils.PlayerStateManager
+import com.example.android.musicapp2.utils.manager.PlayerStateManager
 
 class NowPlayingWidget : AppWidgetProvider() {
 

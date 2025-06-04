@@ -1,4 +1,4 @@
-package com.example.android.musicapp2.adapter
+package com.example.android.musicapp2.view.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +19,6 @@ class SongAdapter(
 
         fun bind(song: DataModel) {
             val position = bindingAdapterPosition
-            if (position == RecyclerView.NO_POSITION) return
 
             val isPlaying = isItemPlaying(position)
 

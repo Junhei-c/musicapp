@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.example.android.musicapp2.service.MusicService
-import com.example.android.musicapp2.utils.PlayerStateManager
+import com.example.android.musicapp2.utils.manager.PlayerStateManager
 
 class  WidgetReceiver : BroadcastReceiver() {
 

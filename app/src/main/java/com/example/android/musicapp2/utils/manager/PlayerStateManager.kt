@@ -1,4 +1,4 @@
-package com.example.android.musicapp2.utils
+package com.example.android.musicapp2.utils.manager
 
 import android.content.Context
 

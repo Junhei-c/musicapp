@@ -11,7 +11,7 @@ import android.os.Looper
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.service.MusicService
-import com.example.android.musicapp2.utils.PlayerManager
+import com.example.android.musicapp2.utils.manager.PlayerManager
 
 class CircleWidget : AppWidgetProvider() {
 

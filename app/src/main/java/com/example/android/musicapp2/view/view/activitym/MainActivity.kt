@@ -1,4 +1,4 @@
-package com.example.android.musicapp2.adapter.mainactivity
+package com.example.android.musicapp2.view.view.activitym
 
 import android.app.PictureInPictureParams
 import android.content.Intent
@@ -7,28 +7,32 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Rational
-import android.view.View
-import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.R
-import com.example.android.musicapp2.adapter.SongAdapter
 import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.state.ModeStateManager
-import com.example.android.musicapp2.utils.PlayerManager
+import com.example.android.musicapp2.utils.extensions.hide
+import com.example.android.musicapp2.utils.extensions.show
+import com.example.android.musicapp2.utils.extensions.toLongOrDefault
+import com.example.android.musicapp2.utils.manager.PlayerManager
+import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 
 @androidx.media3.common.util.UnstableApi
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        private const val WIDGET_ACTION_REFRESH = "REFRESH_WIDGET"
+        private val PIP_ASPECT_RATIO = Rational(16, 9)
+    }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: SongAdapter
@@ -57,26 +61,54 @@ class MainActivity : AppCompatActivity() {
 
         ModeStateManager.syncFromLiveData(viewModel.selectedMode)
 
-        setupToolbar()
-        setupRecyclerView()
-        setupSeekBar()
-        setupPipButton()
+        setSupportActionBar(binding.toolbar)
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
+
+        binding.recyclerViewSongs.setHasFixedSize(true)
+
+        binding.progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    playerManager?.seekTo((playerManager?.getDuration() ?: 0L) * progress.toLongOrDefault())
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
+        binding.buttonEnterPip.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                player = ExoPlayer.Builder(this).build().apply {
+                    setMediaItem(androidx.media3.common.MediaItem.fromUri(VIDEO_URL))
+                    prepare()
+                    playWhenReady = true
+                }
+
+                binding.pipPlayerView.player = player
+                binding.pipPlayerView.show()
+
+                binding.toolbar.hide()
+                binding.recyclerViewSongs.hide()
+                binding.textViewCurrentTitle.hide()
+                binding.imageViewNowPlayingIcon.hide()
+                binding.buttonPlayPause.hide()
+                binding.progressBar.hide()
+                binding.buttonEnterPip.hide()
+
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(PIP_ASPECT_RATIO)
+                        .build()
+                )
+            }
+        }
 
         viewModel.data.observe(this) { songs ->
             setupPlayer(songs)
             setupAdapter(songs)
             setupPlaybackControls()
         }
-    }
-
-    private fun setupToolbar() {
-        setSupportActionBar(binding.toolbar)
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
-    }
-
-    private fun setupRecyclerView() = with(binding.recyclerViewSongs) {
-        layoutManager = LinearLayoutManager(this@MainActivity)
-        setHasFixedSize(true)
     }
 
     private fun setupPlayer(songs: List<DataModel>) {
@@ -119,7 +151,6 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerViewSongs.adapter = adapter
     }
 
-
     private fun setupPlaybackControls() {
         binding.buttonPlayPause.setOnClickListener {
             playerManager?.currentIndex?.takeIf { it != -1 }?.let {
@@ -127,54 +158,6 @@ class MainActivity : AppCompatActivity() {
                 updateNowPlaying()
                 triggerWidgetUpdate()
                 adapter.notifyItemChanged(it)
-            }
-        }
-    }
-
-    private fun setupSeekBar() {
-        binding.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    playerManager?.seekTo((playerManager?.getDuration() ?: 0L) * (progress / 100f).toLong())
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-    }
-
-    private fun setupPipButton() {
-        binding.buttonEnterPip.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                player = ExoPlayer.Builder(this).build().apply {
-                    setMediaItem(MediaItem.fromUri(videoUrl))
-                    prepare()
-                    playWhenReady = true
-                }
-
-                binding.pipPlayerView.apply {
-                    this.player = this@MainActivity.player
-                    setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL)
-                    visibility = View.VISIBLE
-                }
-
-                listOf(
-                    binding.toolbar,
-                    binding.recyclerViewSongs,
-                    binding.textViewCurrentTitle,
-                    binding.imageViewNowPlayingIcon,
-                    binding.buttonPlayPause,
-                    binding.progressBar,
-                    binding.buttonEnterPip
-                ).forEach { it.visibility = View.GONE }
-
-                enterPictureInPictureMode(
-                    PictureInPictureParams.Builder()
-                        .setAspectRatio(Rational(16, 9))
-                        .build()
-                )
             }
         }
     }
@@ -195,7 +178,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun triggerWidgetUpdate() {
         val intent = Intent(this, MusicService::class.java).apply {
-            action = "REFRESH_WIDGET"
+            action = WIDGET_ACTION_REFRESH
         }
         ContextCompat.startForegroundService(this, intent)
     }
@@ -204,7 +187,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && playerManager?.isPlaying() == true) {
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder()
-                    .setAspectRatio(Rational(16, 9))
+                    .setAspectRatio(PIP_ASPECT_RATIO)
                     .build()
             )
         }

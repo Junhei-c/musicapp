@@ -1,7 +1,7 @@
 package com.example.android.musicapp2.controller
 
 import android.content.Context
-import com.example.android.musicapp2.utils.PlayerManager
+import com.example.android.musicapp2.utils.manager.PlayerManager
 
 object MusicController {
 
