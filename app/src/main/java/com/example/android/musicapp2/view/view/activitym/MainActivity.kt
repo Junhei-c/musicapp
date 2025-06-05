@@ -25,7 +25,6 @@ import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 
-@androidx.media3.common.util.UnstableApi
 class MainActivity : AppCompatActivity() {
 
     private val pipAspectRatio = Rational(16, 9)
