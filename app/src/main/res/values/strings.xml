@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-
     <string name="app_name">MusicApp</string>
     <string name="toolbar_title">Music App</string>
-
-
     <string name="default_title">No Title</string>
     <string name="play_pause_button_desc">Play or pause the current song</string>
     <string name="enter_pip">Enter PiP</string>
     <string name="now_playing_icon">Now playing icon</string>
     <string name="song_icon">Song icon</string>
-
-
-
+    <string name="video_url">https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4</string>
+    <string name="widget_action_refresh">REFRESH_WIDGET</string>
     <string name="widget_prev_desc">Previous</string>
     <string name="widget_play_desc">Play</string>
     <string name="widget_next_desc">Next</string>
-
 </resources>
 
 

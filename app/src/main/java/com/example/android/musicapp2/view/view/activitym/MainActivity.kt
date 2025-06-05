@@ -28,11 +28,7 @@ import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 @androidx.media3.common.util.UnstableApi
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        private const val VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        private const val WIDGET_ACTION_REFRESH = "REFRESH_WIDGET"
-        private val PIP_ASPECT_RATIO = Rational(16, 9)
-    }
+    private val pipAspectRatio = Rational(16, 9)
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: SongAdapter
@@ -80,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         binding.buttonEnterPip.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 player = ExoPlayer.Builder(this).build().apply {
-                    setMediaItem(androidx.media3.common.MediaItem.fromUri(VIDEO_URL))
+                    setMediaItem(androidx.media3.common.MediaItem.fromUri(getString(R.string.video_url)))
                     prepare()
                     playWhenReady = true
                 }
@@ -98,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
                 enterPictureInPictureMode(
                     PictureInPictureParams.Builder()
-                        .setAspectRatio(PIP_ASPECT_RATIO)
+                        .setAspectRatio(pipAspectRatio)
                         .build()
                 )
             }
@@ -178,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun triggerWidgetUpdate() {
         val intent = Intent(this, MusicService::class.java).apply {
-            action = WIDGET_ACTION_REFRESH
+            action = getString(R.string.widget_action_refresh)
         }
         ContextCompat.startForegroundService(this, intent)
     }
@@ -187,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && playerManager?.isPlaying() == true) {
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder()
-                    .setAspectRatio(PIP_ASPECT_RATIO)
+                    .setAspectRatio(pipAspectRatio)
                     .build()
             )
         }
