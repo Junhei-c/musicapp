@@ -58,7 +58,7 @@ class PlayerManager private constructor(private val context: Context) {
         } else {
             play(index)
         }
-        onPlaybackChanged?.invoke()
+
     }
 
     fun playNext() {

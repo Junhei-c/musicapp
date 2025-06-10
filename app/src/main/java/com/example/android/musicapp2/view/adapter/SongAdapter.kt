@@ -17,9 +17,7 @@ class SongAdapter(
     inner class SongViewHolder(private val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(song: DataModel) {
-            val position = bindingAdapterPosition
-
+        fun bind(song: DataModel, position: Int) {
             val isPlaying = isItemPlaying(position)
 
             binding.textViewSongName.text = song.name
@@ -37,12 +35,15 @@ class SongAdapter(
                 if (isPlaying) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected
             )
 
-            binding.buttonPlay.setOnClickListener {
+            val clickListener = View.OnClickListener {
                 val safePos = bindingAdapterPosition
                 if (safePos != RecyclerView.NO_POSITION) {
                     onSongClick(song, safePos)
                 }
             }
+
+            binding.buttonPlay.setOnClickListener(clickListener)
+            binding.cardViewItem.setOnClickListener(clickListener)
         }
     }
 
@@ -52,8 +53,12 @@ class SongAdapter(
     }
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-        holder.bind(songs[position])
+        holder.bind(songs[position], position)
     }
 
     override fun getItemCount(): Int = songs.size
+
+    override fun getItemViewType(position: Int): Int = position
 }
+
+

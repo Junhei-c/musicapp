@@ -8,6 +8,8 @@
     android:layout_marginBottom="@dimen/margin_small"
     android:layout_marginStart="@dimen/margin_medium"
     android:layout_marginEnd="@dimen/margin_medium"
+    android:clickable="true"
+    android:focusable="true"
     app:cardCornerRadius="@dimen/card_corner_radius"
     app:cardElevation="@dimen/card_elevation">
 
@@ -51,6 +53,8 @@
             android:background="@android:color/transparent"
             android:src="@drawable/play"
             android:contentDescription="@string/play_pause_button_desc"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
