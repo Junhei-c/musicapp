@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
@@ -19,7 +20,6 @@ import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.state.ModeStateManager
 import com.example.android.musicapp2.utils.extensions.hide
 import com.example.android.musicapp2.utils.extensions.show
-import com.example.android.musicapp2.utils.extensions.toLongOrDefault
 import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
@@ -60,11 +60,13 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
         binding.recyclerViewSongs.setHasFixedSize(true)
+        binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
         binding.progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    playerManager?.seekTo((playerManager?.getDuration() ?: 0L) * progress.toLongOrDefault())
+                    val duration = playerManager?.getDuration() ?: 0L
+                    playerManager?.seekTo(duration * progress / 100)
                 }
             }
 
@@ -100,9 +102,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.data.observe(this) { songs ->
-            setupPlayer(songs)
-            setupAdapter(songs)
-            setupPlaybackControls()
+            if (!::adapter.isInitialized) {
+                setupAdapter(songs)
+            }
+            if (playerManager == null) {
+                setupPlayer(songs)
+                setupPlaybackControls()
+            }
         }
     }
 
@@ -115,8 +121,10 @@ class MainActivity : AppCompatActivity() {
 
                 updateNowPlaying()
 
-                if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
-                if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
+                if (::adapter.isInitialized) {
+                    if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
+                    if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
+                }
 
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)

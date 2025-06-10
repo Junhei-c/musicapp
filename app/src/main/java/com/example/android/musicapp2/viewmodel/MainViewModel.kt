@@ -24,3 +24,4 @@ class MainViewModel(
         _selectedMode.value = mode
     }
 }
+
