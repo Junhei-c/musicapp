@@ -87,12 +87,10 @@ class MainActivity : AppCompatActivity() {
                 binding.pipPlayerView.show()
 
                 binding.toolbar.hide()
-                binding.recyclerViewSongs.hide()
-                binding.textViewCurrentTitle.hide()
                 binding.imageViewNowPlayingIcon.hide()
                 binding.buttonPlayPause.hide()
                 binding.progressBar.hide()
-                binding.buttonEnterPip.hide()
+                binding.textViewCurrentTitle.hide()
 
                 enterPictureInPictureMode(
                     PictureInPictureParams.Builder()
