@@ -1,4 +1,4 @@
-package com.example.android.musicapp2.view.view.activitym
+package com.example.android.musicapp2.view.view.activity
 
 import android.app.PictureInPictureParams
 import android.content.Intent
@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var player: ExoPlayer
     private var playerManager: PlayerManager? = null
     private var lastPlayingIndex: Int = -1
+    private var selectedIndex: Int = -1
 
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
@@ -118,6 +119,7 @@ class MainActivity : AppCompatActivity() {
             setOnPlaybackChangedListener {
                 val previousIndex = lastPlayingIndex
                 lastPlayingIndex = currentIndex
+                selectedIndex = currentIndex
 
                 updateNowPlaying()
 
@@ -138,18 +140,17 @@ class MainActivity : AppCompatActivity() {
         adapter = SongAdapter(
             songs = songs,
             onSongClick = { _, index ->
-                val previousIndex = playerManager?.currentIndex ?: -1
-                playerManager?.togglePlayback(index)
+                val previousIndex = selectedIndex
+                selectedIndex = index
 
+                playerManager?.togglePlayback(index)
                 updateNowPlaying()
                 triggerWidgetUpdate()
 
                 if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
                 adapter.notifyItemChanged(index)
             },
-            isItemPlaying = { index ->
-                playerManager?.let { index == it.currentIndex && it.isPlaying() } ?: false
-            }
+            isItemPlaying = { index -> index == selectedIndex }
         )
         binding.recyclerViewSongs.adapter = adapter
     }

@@ -18,7 +18,7 @@
 
 
         <activity
-            android:name=".view.view.activitym.MainActivity"
+            android:name=".view.view.activity.MainActivity"
             android:supportsPictureInPicture="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true">

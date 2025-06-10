@@ -11,21 +11,21 @@ class DataRepository {
             DataModel(
                 id = 1,
                 name = "Lo-FI Chime",
-                url = "https://your-audio-url.com/lofi.mp3",
+                url = "https://cdn.freesound.org/previews/797/797794_5674468-lq.mp3",
                 imageRes = R.drawable.chime,
                 mediaType = MediaTypeEnum.AUDIO
             ),
             DataModel(
                 id = 2,
                 name = "Synth Key",
-                url = "https://your-audio-url.com/synth.mp3",
+                url = "https://cdn.freesound.org/previews/795/795893_462105-lq.mp3",
                 imageRes = R.drawable.bigpiano,
                 mediaType = MediaTypeEnum.AUDIO
             ),
             DataModel(
                 id = 3,
                 name = "Dream Tone",
-                url = "https://your-audio-url.com/dream.mp3",
+                url = "https://cdn.freesound.org/previews/795/795963_2061858-lq.mp3",
                 imageRes = R.drawable.earlybirds,
                 mediaType = MediaTypeEnum.AUDIO
             ),
