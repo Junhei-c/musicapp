@@ -132,6 +132,12 @@ class MainActivity : AppCompatActivity() {
                 if (song.mediaType == MediaTypeEnum.VIDEO) {
                     playVideoInline(song.url, index)
                 } else {
+
+                    if (::player.isInitialized) {
+                        player.stop()
+                        player.clearMediaItems()
+                    }
+
                     playerManager?.togglePlayback(index)
                     updateNowPlaying()
                     binding.pipPlayerView.hide()
@@ -151,6 +157,7 @@ class MainActivity : AppCompatActivity() {
         )
         binding.recyclerViewSongs.adapter = adapter
     }
+
 
     private fun setupPlaybackControls() {
         binding.buttonPlayPause.setOnClickListener {
