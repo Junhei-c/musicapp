@@ -7,14 +7,17 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Rational
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ActivityMainBinding
 import com.example.android.musicapp2.model.DataModel
+import com.example.android.musicapp2.model.MediaTypeEnum
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.state.ModeStateManager
@@ -76,22 +79,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         binding.buttonEnterPip.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                player = ExoPlayer.Builder(this).build().apply {
-                    setMediaItem(androidx.media3.common.MediaItem.fromUri(getString(R.string.video_url)))
-                    prepare()
-                    playWhenReady = true
-                }
-
-                binding.pipPlayerView.player = player
-                binding.pipPlayerView.show()
-
-                binding.toolbar.hide()
-                binding.imageViewNowPlayingIcon.hide()
-                binding.buttonPlayPause.hide()
-                binding.progressBar.hide()
-                binding.textViewCurrentTitle.hide()
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized) {
                 enterPictureInPictureMode(
                     PictureInPictureParams.Builder()
                         .setAspectRatio(pipAspectRatio)
@@ -137,14 +125,25 @@ class MainActivity : AppCompatActivity() {
     private fun setupAdapter(songs: List<DataModel>) {
         adapter = SongAdapter(
             songs = songs,
-            onSongClick = { _, index ->
+            onSongClick = { song, index ->
                 val previousIndex = selectedIndex
                 selectedIndex = index
 
-                playerManager?.togglePlayback(index)
-                updateNowPlaying()
-                triggerWidgetUpdate()
+                if (song.mediaType == MediaTypeEnum.VIDEO) {
+                    playVideoInline(song.url, index)
+                } else {
+                    playerManager?.togglePlayback(index)
+                    updateNowPlaying()
+                    binding.pipPlayerView.hide()
+                    binding.pipPlayerView.visibility = View.GONE
+                    binding.toolbar.show()
+                    binding.imageViewNowPlayingIcon.show()
+                    binding.buttonPlayPause.show()
+                    binding.progressBar.show()
+                    binding.textViewCurrentTitle.show()
+                }
 
+                triggerWidgetUpdate()
                 if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
                 adapter.notifyItemChanged(index)
             },
@@ -178,6 +177,26 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.progress = playerManager?.getPlaybackPercentage() ?: 0
     }
 
+    private fun playVideoInline(mediaUrl: String, index: Int) {
+        if (!::player.isInitialized) {
+            player = ExoPlayer.Builder(this).build()
+        }
+
+        player.setMediaItem(MediaItem.fromUri(mediaUrl))
+        player.prepare()
+        player.playWhenReady = true
+
+        binding.pipPlayerView.player = player
+        binding.pipPlayerView.visibility = View.VISIBLE
+        binding.pipPlayerView.show()
+
+        binding.toolbar.hide()
+        binding.imageViewNowPlayingIcon.hide()
+        binding.buttonPlayPause.hide()
+        binding.progressBar.hide()
+        binding.textViewCurrentTitle.hide()
+    }
+
     private fun triggerWidgetUpdate() {
         val intent = Intent(this, MusicService::class.java).apply {
             action = getString(R.string.widget_action_refresh)
@@ -186,7 +205,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onUserLeaveHint() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && playerManager?.isPlaying() == true) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized && player.isPlaying) {
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder()
                     .setAspectRatio(pipAspectRatio)
