@@ -9,7 +9,7 @@ import com.example.android.musicapp2.databinding.ItemSongBinding
 import com.example.android.musicapp2.model.DataModel
 
 class SongAdapter(
-    private val songs: List<DataModel>,
+    private var songs: List<DataModel>,
     private val onSongClick: (DataModel, Int) -> Unit,
     private val isItemPlaying: (Int) -> Boolean
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
@@ -17,21 +17,17 @@ class SongAdapter(
     inner class SongViewHolder(private val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(song: DataModel, position: Int) {
+        fun bind(song: DataModel, position: Int) = with(binding) {
             val isPlaying = isItemPlaying(position)
 
-            binding.textViewSongName.text = song.name
-
-            binding.imageViewIcon.apply {
+            textViewSongName.text = song.name
+            imageViewIcon.apply {
                 visibility = if (isPlaying) View.VISIBLE else View.INVISIBLE
                 setImageResource(R.drawable.group)
             }
 
-            binding.buttonPlay.setImageResource(
-                if (isPlaying) R.drawable.pause else R.drawable.play
-            )
-
-            binding.cardViewItem.setBackgroundResource(
+            buttonPlay.setImageResource(if (isPlaying) R.drawable.pause else R.drawable.play)
+            cardViewItem.setBackgroundResource(
                 if (isPlaying) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected
             )
 
@@ -42,8 +38,8 @@ class SongAdapter(
                 }
             }
 
-            binding.buttonPlay.setOnClickListener(clickListener)
-            binding.cardViewItem.setOnClickListener(clickListener)
+            buttonPlay.setOnClickListener(clickListener)
+            cardViewItem.setOnClickListener(clickListener)
         }
     }
 
@@ -59,6 +55,11 @@ class SongAdapter(
     override fun getItemCount(): Int = songs.size
 
     override fun getItemViewType(position: Int): Int = position
+
+    fun updateSongs(newSongs: List<DataModel>) {
+        songs = newSongs
+        notifyDataSetChanged()
+    }
 }
 
 

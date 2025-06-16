@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var playerManager: PlayerManager? = null
     private var lastPlayingIndex: Int = -1
     private var selectedIndex: Int = -1
+    private var currentMode: MediaTypeEnum = MediaTypeEnum.AUDIO
 
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
@@ -88,9 +89,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Ensure default selection and load audio list on start
+        binding.modeToggleGroup.post {
+            binding.modeToggleGroup.check(R.id.buttonAudio)
+            viewModel.filterDataByType(MediaTypeEnum.AUDIO)
+        }
+
+        binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val newMode = if (checkedId == R.id.buttonAudio) MediaTypeEnum.AUDIO else MediaTypeEnum.VIDEO
+                if (newMode != currentMode) {
+                    if (currentMode == MediaTypeEnum.VIDEO && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized && player.isPlaying) {
+                        enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(pipAspectRatio).build())
+                    }
+                    currentMode = newMode
+                    viewModel.filterDataByType(currentMode)
+                }
+            }
+        }
+
         viewModel.data.observe(this) { songs ->
             if (!::adapter.isInitialized) {
                 setupAdapter(songs)
+            } else {
+                adapter.updateSongs(songs)
             }
             if (playerManager == null) {
                 setupPlayer(songs)
@@ -132,12 +154,10 @@ class MainActivity : AppCompatActivity() {
                 if (song.mediaType == MediaTypeEnum.VIDEO) {
                     playVideoInline(song.url, index)
                 } else {
-
                     if (::player.isInitialized) {
                         player.stop()
                         player.clearMediaItems()
                     }
-
                     playerManager?.togglePlayback(index)
                     updateNowPlaying()
                     binding.pipPlayerView.hide()
@@ -157,7 +177,6 @@ class MainActivity : AppCompatActivity() {
         )
         binding.recyclerViewSongs.adapter = adapter
     }
-
 
     private fun setupPlaybackControls() {
         binding.buttonPlayPause.setOnClickListener {
@@ -229,3 +248,5 @@ class MainActivity : AppCompatActivity() {
         if (::player.isInitialized) player.release()
     }
 }
+
+
