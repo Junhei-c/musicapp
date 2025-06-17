@@ -13,32 +13,53 @@
         android:background="@color/colorPrimaryVariant"
         android:title="@string/toolbar_title"
         android:titleTextColor="@color/white"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/modeToggleGroup"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:singleSelection="true"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:paddingHorizontal="8dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:singleSelection="true">
 
-        <com.google.android.material.button.MaterialButton
+
+    <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAudio"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Audio" />
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:text="Audio"
+            android:textSize="16sp"
+            android:backgroundTint="#D1E2E7"
+            app:cornerRadius="16dp"
+            app:checkedIcon="@null"
+            app:strokeWidth="0dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonVideo"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Video" />
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:backgroundTint="#D1E2E7"
+            app:cornerRadius="16dp"
+            android:text="Video"
+            android:textSize="16sp"
+            app:checkedIcon="@null"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent"
+            app:strokeWidth="0dp" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <androidx.cardview.widget.CardView
@@ -48,28 +69,26 @@
         app:cardBackgroundColor="@color/widget_highlight"
         app:cardCornerRadius="@dimen/card_corner_radius"
         app:cardElevation="@dimen/card_elevation"
-        app:layout_constraintTop_toBottomOf="@id/modeToggleGroup"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/modeToggleGroup">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="0dp">
+            android:layout_height="match_parent">
 
             <androidx.media3.ui.PlayerView
                 android:id="@+id/pipPlayerView"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:visibility="gone"
-                android:layout_margin="0dp"
                 android:background="@android:color/black"
-                app:use_controller="false"
-                app:resize_mode="fill"
-                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:resize_mode="fill"
+                app:use_controller="false" />
 
             <TextView
                 android:id="@+id/textViewCurrentTitle"
@@ -79,8 +98,8 @@
                 android:textColor="@color/black"
                 android:textSize="@dimen/song_title_size"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/imageViewNowPlayingIcon"
@@ -88,44 +107,43 @@
                 android:layout_height="@dimen/image_size"
                 android:contentDescription="@string/now_playing_icon"
                 android:src="@drawable/ic_launcher_foreground"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/buttonPlayPause"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:src="@drawable/play"
                 android:contentDescription="@string/play_pause_button_desc"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                android:src="@drawable/play"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <SeekBar
                 android:id="@+id/progressBar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_small"
                 android:max="100"
                 android:progress="0"
-                android:layout_marginTop="@dimen/spacing_small"
-                app:layout_constraintTop_toBottomOf="@id/textViewCurrentTitle"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/textViewCurrentTitle" />
 
             <ImageButton
                 android:id="@+id/buttonEnterPip"
                 android:layout_width="@dimen/pip_button_size"
                 android:layout_height="@dimen/pip_button_size"
-                android:layout_marginStart="@dimen/margin_xsmall"
                 android:layout_marginBottom="@dimen/margin_xsmall"
-                android:src="@drawable/pip"
+                android:layout_marginStart="@dimen/margin_xsmall"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/enter_pip"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
+                android:src="@drawable/pip"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -134,14 +152,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/spacing_small"
-        app:layout_constraintTop_toBottomOf="@id/nowPlayingCard"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+        app:layout_constraintTop_toBottomOf="@id/nowPlayingCard" />
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
 

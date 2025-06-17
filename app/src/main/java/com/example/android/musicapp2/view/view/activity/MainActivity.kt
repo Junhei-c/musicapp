@@ -2,6 +2,7 @@ package com.example.android.musicapp2.view.view.activity
 
 import android.app.PictureInPictureParams
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -27,6 +28,7 @@ import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -89,22 +91,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Ensure default selection and load audio list on start
         binding.modeToggleGroup.post {
             binding.modeToggleGroup.check(R.id.buttonAudio)
             viewModel.filterDataByType(MediaTypeEnum.AUDIO)
+            updateToggleButtonColors(R.id.buttonAudio)
         }
 
         binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val newMode = if (checkedId == R.id.buttonAudio) MediaTypeEnum.AUDIO else MediaTypeEnum.VIDEO
                 if (newMode != currentMode) {
-                    if (currentMode == MediaTypeEnum.VIDEO && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized && player.isPlaying) {
-                        enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(pipAspectRatio).build())
+                    if (currentMode == MediaTypeEnum.VIDEO &&
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                        ::player.isInitialized && player.isPlaying
+                    ) {
+                        enterPictureInPictureMode(
+                            PictureInPictureParams.Builder()
+                                .setAspectRatio(pipAspectRatio)
+                                .build()
+                        )
                     }
                     currentMode = newMode
                     viewModel.filterDataByType(currentMode)
                 }
+                updateToggleButtonColors(checkedId)
             }
         }
 
@@ -163,6 +173,7 @@ class MainActivity : AppCompatActivity() {
                     binding.pipPlayerView.hide()
                     binding.pipPlayerView.visibility = View.GONE
                     binding.toolbar.show()
+                    binding.modeToggleGroup.show()
                     binding.imageViewNowPlayingIcon.show()
                     binding.buttonPlayPause.show()
                     binding.progressBar.show()
@@ -241,12 +252,41 @@ class MainActivity : AppCompatActivity() {
         super.onUserLeaveHint()
     }
 
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        if (isInPictureInPictureMode) {
+            binding.modeToggleGroup.hide()
+        } else {
+            if (currentMode == MediaTypeEnum.VIDEO) {
+                binding.modeToggleGroup.show()
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(progressUpdater)
         playerManager?.release()
         if (::player.isInitialized) player.release()
     }
+
+    private fun updateToggleButtonColors(checkedId: Int) {
+        val selectedColor = Color.parseColor("#11387B")
+        val unselectedColor = Color.parseColor("#D1E2E7")
+
+        val buttons = listOf(binding.buttonAudio, binding.buttonVideo)
+        buttons.forEach { button ->
+            button.setBackgroundColor(unselectedColor)
+            button.setTextColor(Color.BLACK)
+        }
+
+        val selectedButton = findViewById<MaterialButton>(checkedId)
+        selectedButton.setBackgroundColor(selectedColor)
+        selectedButton.setTextColor(Color.WHITE)
+    }
 }
+
+
+
 
 
