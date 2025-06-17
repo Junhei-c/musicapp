@@ -35,6 +35,23 @@ class PlayerManager private constructor(private val context: Context) {
         }
         player.setMediaItems(mediaItems)
         player.prepare()
+        player.playWhenReady = false
+    }
+
+    fun prepareOnly(index: Int) {
+        val data = playlist.getOrNull(index) ?: return
+        val mediaItem = MediaItem.fromUri(data.url)
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.playWhenReady = false
+        currentIndex = index
+    }
+
+    fun setMediaItem(index: Int) {
+        val data = playlist.getOrNull(index) ?: return
+        val mediaItem = MediaItem.fromUri(data.url)
+        player.setMediaItem(mediaItem)
+        currentIndex = index
     }
 
     fun play(index: Int) {
@@ -53,12 +70,16 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun togglePlayback(index: Int) {
-        if (index == currentIndex && player.isPlaying) {
-            pause()
+        if (currentIndex == index && isPlaying()) {
+            player.pause()
         } else {
-            play(index)
+            val data = playlist.getOrNull(index) ?: return
+            val mediaItem = MediaItem.fromUri(data.url)
+            player.setMediaItem(mediaItem)
+            player.prepare()
+            player.playWhenReady = true
+            currentIndex = index
         }
-
     }
 
     fun playNext() {
@@ -76,6 +97,7 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun isPlaying(): Boolean = player.isPlaying
+
     fun getPlaybackPercentage(): Int {
         val duration = player.duration
         val position = player.currentPosition
@@ -97,6 +119,7 @@ class PlayerManager private constructor(private val context: Context) {
             }
     }
 }
+
 
 
 
