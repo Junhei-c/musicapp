@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
             updateToggleButtonColors(R.id.buttonAudio)
         }
 
-        // ✅ UPDATED BLOCK: Triggers PiP when switching from Video to Audio
+
         binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val newMode = if (checkedId == R.id.buttonAudio) MediaTypeEnum.AUDIO else MediaTypeEnum.VIDEO
