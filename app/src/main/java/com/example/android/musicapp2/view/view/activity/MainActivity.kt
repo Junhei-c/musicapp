@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerViewSongs.setHasFixedSize(true)
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
 
+        binding.progressBar.hide()
         binding.progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -96,7 +97,6 @@ class MainActivity : AppCompatActivity() {
             viewModel.filterDataByType(MediaTypeEnum.AUDIO)
             updateToggleButtonColors(R.id.buttonAudio)
         }
-
 
         binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                         player.stop()
                         player.clearMediaItems()
                     }
-                    playerManager?.togglePlayback(index)
+                    playerManager?.play(index)
                     updateNowPlaying()
                     binding.pipPlayerView.hide()
                     binding.pipPlayerView.visibility = View.GONE
@@ -180,7 +180,6 @@ class MainActivity : AppCompatActivity() {
                     binding.modeToggleGroup.show()
                     binding.imageViewNowPlayingIcon.show()
                     binding.buttonPlayPause.show()
-                    binding.progressBar.show()
                     binding.textViewCurrentTitle.show()
                 }
 
