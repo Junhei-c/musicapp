@@ -33,7 +33,6 @@ import com.google.android.material.button.MaterialButton
 class MainActivity : AppCompatActivity() {
 
     private val pipAspectRatio = Rational(16, 9)
-
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: SongAdapter
     private lateinit var player: ExoPlayer
@@ -66,10 +65,9 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
-        binding.recyclerViewSongs.setHasFixedSize(true)
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
+        binding.recyclerViewSongs.setHasFixedSize(true)
 
-        binding.progressBar.hide()
         binding.progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -77,7 +75,6 @@ class MainActivity : AppCompatActivity() {
                     playerManager?.seekTo(duration * progress / 100)
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
@@ -101,20 +98,15 @@ class MainActivity : AppCompatActivity() {
         binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val newMode = if (checkedId == R.id.buttonAudio) MediaTypeEnum.AUDIO else MediaTypeEnum.VIDEO
-
-                if (currentMode == MediaTypeEnum.VIDEO &&
-                    newMode == MediaTypeEnum.AUDIO &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                    ::player.isInitialized && player.isPlaying
-                ) {
-                    enterPictureInPictureMode(
-                        PictureInPictureParams.Builder()
-                            .setAspectRatio(pipAspectRatio)
-                            .build()
-                    )
-                }
-
                 if (newMode != currentMode) {
+                    if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO &&
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized && player.isPlaying) {
+                        enterPictureInPictureMode(
+                            PictureInPictureParams.Builder()
+                                .setAspectRatio(pipAspectRatio)
+                                .build()
+                        )
+                    }
                     currentMode = newMode
                     viewModel.filterDataByType(currentMode)
                 }
@@ -142,17 +134,14 @@ class MainActivity : AppCompatActivity() {
                 val previousIndex = lastPlayingIndex
                 lastPlayingIndex = currentIndex
                 selectedIndex = currentIndex
-
                 updateNowPlaying()
 
                 if (::adapter.isInitialized) {
                     if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
                     if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
                 }
-
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)
-
                 triggerWidgetUpdate()
             }
         }
@@ -166,20 +155,20 @@ class MainActivity : AppCompatActivity() {
                 selectedIndex = index
 
                 if (song.mediaType == MediaTypeEnum.VIDEO) {
-                    playVideoInline(song.url, index)
+                    playVideoInline(song.url)
                 } else {
                     if (::player.isInitialized) {
                         player.stop()
                         player.clearMediaItems()
                     }
-                    playerManager?.play(index)
+                    playerManager?.togglePlayback(index)
                     updateNowPlaying()
                     binding.pipPlayerView.hide()
-                    binding.pipPlayerView.visibility = View.GONE
                     binding.toolbar.show()
                     binding.modeToggleGroup.show()
                     binding.imageViewNowPlayingIcon.show()
                     binding.buttonPlayPause.show()
+                    binding.progressBar.show()
                     binding.textViewCurrentTitle.show()
                 }
 
@@ -206,22 +195,18 @@ class MainActivity : AppCompatActivity() {
     private fun updateNowPlaying() {
         val song = playerManager?.getCurrentData()
         val isPlaying = playerManager?.isPlaying() == true
-
         binding.textViewCurrentTitle.text = song?.name.orEmpty()
         song?.imageRes?.let { binding.imageViewNowPlayingIcon.setImageResource(it) }
-
         binding.buttonPlayPause.setImageResource(
             if (isPlaying) R.drawable.iconparkpauseone else R.drawable.iconparkplay
         )
-
         binding.progressBar.progress = playerManager?.getPlaybackPercentage() ?: 0
     }
 
-    private fun playVideoInline(mediaUrl: String, index: Int) {
+    private fun playVideoInline(mediaUrl: String) {
         if (!::player.isInitialized) {
             player = ExoPlayer.Builder(this).build()
         }
-
         player.setMediaItem(MediaItem.fromUri(mediaUrl))
         player.prepare()
         player.playWhenReady = true
@@ -231,6 +216,7 @@ class MainActivity : AppCompatActivity() {
         binding.pipPlayerView.show()
 
         binding.toolbar.hide()
+        binding.modeToggleGroup.hide()
         binding.imageViewNowPlayingIcon.hide()
         binding.buttonPlayPause.hide()
         binding.progressBar.hide()
@@ -276,13 +262,11 @@ class MainActivity : AppCompatActivity() {
     private fun updateToggleButtonColors(checkedId: Int) {
         val selectedColor = Color.parseColor("#11387B")
         val unselectedColor = Color.parseColor("#D1E2E7")
-
         val buttons = listOf(binding.buttonAudio, binding.buttonVideo)
         buttons.forEach { button ->
             button.setBackgroundColor(unselectedColor)
             button.setTextColor(Color.BLACK)
         }
-
         val selectedButton = findViewById<MaterialButton>(checkedId)
         selectedButton.setBackgroundColor(selectedColor)
         selectedButton.setTextColor(Color.WHITE)
