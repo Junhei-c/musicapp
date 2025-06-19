@@ -1,4 +1,4 @@
-package com.example.android.musicapp2.view.view.activity
+package com.example.android.musicapp2.view.activity
 
 import android.app.PictureInPictureParams
 import android.content.Intent
