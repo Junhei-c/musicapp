@@ -31,8 +31,7 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:singleSelection="true">
 
-
-    <com.google.android.material.button.MaterialButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAudio"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -46,7 +45,6 @@
             app:strokeWidth="0dp"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent" />
 
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonVideo"
             android:layout_width="0dp"
@@ -54,9 +52,9 @@
             android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:backgroundTint="#D1E2E7"
-            app:cornerRadius="16dp"
             android:text="Video"
             android:textSize="16sp"
+            app:cornerRadius="16dp"
             app:checkedIcon="@null"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent"
             app:strokeWidth="0dp" />
@@ -156,9 +154,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/nowPlayingCard" />
+
+
+    <FrameLayout
+        android:id="@+id/miniPlayerFrame"
+        android:layout_width="200dp"
+        android:layout_height="112dp"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/miniPlayerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:use_controller="true"
+            app:resize_mode="fill" />
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
 

@@ -9,11 +9,13 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Rational
 import android.view.View
+import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ActivityMainBinding
@@ -41,6 +43,9 @@ class MainActivity : AppCompatActivity() {
     private var selectedIndex: Int = -1
     private var currentMode: MediaTypeEnum = MediaTypeEnum.AUDIO
 
+    private lateinit var miniPlayerFrame: FrameLayout
+    private lateinit var miniPlayerView: PlayerView
+
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
     }
@@ -59,6 +64,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
+        miniPlayerView = findViewById(R.id.miniPlayerView)
 
         ModeStateManager.syncFromLiveData(viewModel.selectedMode)
 
@@ -98,15 +106,18 @@ class MainActivity : AppCompatActivity() {
         binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val newMode = if (checkedId == R.id.buttonAudio) MediaTypeEnum.AUDIO else MediaTypeEnum.VIDEO
+
                 if (newMode != currentMode) {
                     if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO &&
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized && player.isPlaying) {
-                        enterPictureInPictureMode(
-                            PictureInPictureParams.Builder()
-                                .setAspectRatio(pipAspectRatio)
-                                .build()
-                        )
+                        ::player.isInitialized && player.isPlaying) {
+                        enterMiniPlayerMode()
                     }
+
+                    if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO &&
+                        miniPlayerFrame.visibility == View.VISIBLE) {
+                        exitMiniPlayerMode()
+                    }
+
                     currentMode = newMode
                     viewModel.filterDataByType(currentMode)
                 }
@@ -221,6 +232,18 @@ class MainActivity : AppCompatActivity() {
         binding.buttonPlayPause.hide()
         binding.progressBar.hide()
         binding.textViewCurrentTitle.hide()
+    }
+
+    private fun enterMiniPlayerMode() {
+        binding.nowPlayingCard.hide()
+        miniPlayerFrame.show()
+        miniPlayerView.player = player
+    }
+
+    private fun exitMiniPlayerMode() {
+        miniPlayerFrame.hide()
+        binding.nowPlayingCard.show()
+        binding.pipPlayerView.player = player
     }
 
     private fun triggerWidgetUpdate() {
