@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                     playerManager?.seekTo(duration * progress / 100)
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
@@ -117,12 +118,14 @@ class MainActivity : AppCompatActivity() {
 
                 if (newMode != currentMode) {
                     if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO &&
-                        ::player.isInitialized && player.isPlaying) {
+                        ::player.isInitialized && player.isPlaying
+                    ) {
                         enterMiniPlayerMode()
                     }
 
                     if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO &&
-                        miniPlayerFrame.visibility == View.VISIBLE) {
+                        miniPlayerFrame.visibility == View.VISIBLE
+                    ) {
                         exitMiniPlayerMode()
                     }
 
@@ -164,6 +167,7 @@ class MainActivity : AppCompatActivity() {
                     if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
                     if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
                 }
+
                 handler.removeCallbacks(progressUpdater)
                 if (isPlaying()) handler.post(progressUpdater)
                 triggerWidgetUpdate()
@@ -187,7 +191,15 @@ class MainActivity : AppCompatActivity() {
                     }
                     playerManager?.togglePlayback(index)
                     updateNowPlaying()
+
                     binding.pipPlayerView.hide()
+
+                    if (miniPlayerFrame.visibility == View.VISIBLE) {
+                        exitMiniPlayerMode()
+                    }
+                    binding.pipPlayerView.hide()
+                    binding.recyclerViewSongs.show()
+
                     binding.toolbar.show()
                     binding.modeToggleGroup.show()
                     binding.imageViewNowPlayingIcon.show()
@@ -195,6 +207,7 @@ class MainActivity : AppCompatActivity() {
                     binding.progressBar.show()
                     binding.textViewCurrentTitle.show()
                 }
+
 
                 triggerWidgetUpdate()
                 if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
@@ -231,6 +244,7 @@ class MainActivity : AppCompatActivity() {
         if (!::player.isInitialized) {
             player = ExoPlayer.Builder(this).build()
         }
+
         player.setMediaItem(MediaItem.fromUri(mediaUrl))
         player.prepare()
         player.playWhenReady = true
@@ -240,7 +254,6 @@ class MainActivity : AppCompatActivity() {
         binding.pipPlayerView.show()
 
         binding.toolbar.hide()
-        binding.modeToggleGroup.hide()
         binding.imageViewNowPlayingIcon.hide()
         binding.buttonPlayPause.hide()
         binding.progressBar.hide()
@@ -251,6 +264,13 @@ class MainActivity : AppCompatActivity() {
         binding.nowPlayingCard.hide()
         miniPlayerFrame.show()
         miniPlayerView.player = player
+
+        binding.toolbar.show()
+        binding.imageViewNowPlayingIcon.show()
+        binding.buttonPlayPause.show()
+        binding.progressBar.show()
+        binding.textViewCurrentTitle.show()
+        binding.pipPlayerView.hide()
     }
 
     private fun exitMiniPlayerMode() {
@@ -308,8 +328,6 @@ class MainActivity : AppCompatActivity() {
         selectedButton.setTextColor(Color.WHITE)
     }
 }
-
-
 
 
 
