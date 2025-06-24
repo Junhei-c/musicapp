@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -24,6 +25,7 @@ import com.example.android.musicapp2.model.MediaTypeEnum
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.state.ModeStateManager
+import com.example.android.musicapp2.utils.datastore.DataStoreManager
 import com.example.android.musicapp2.utils.extensions.hide
 import com.example.android.musicapp2.utils.extensions.show
 import com.example.android.musicapp2.utils.manager.PlayerManager
@@ -31,6 +33,7 @@ import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -97,10 +100,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.modeToggleGroup.post {
-            binding.modeToggleGroup.check(R.id.buttonAudio)
-            viewModel.filterDataByType(MediaTypeEnum.AUDIO)
-            updateToggleButtonColors(R.id.buttonAudio)
+        lifecycleScope.launch {
+            DataStoreManager.getMode(this@MainActivity).collect { savedMode ->
+                val mode = if (savedMode == "VIDEO") MediaTypeEnum.VIDEO else MediaTypeEnum.AUDIO
+                currentMode = mode
+                val buttonId = if (mode == MediaTypeEnum.AUDIO) R.id.buttonAudio else R.id.buttonVideo
+                binding.modeToggleGroup.check(buttonId)
+                viewModel.filterDataByType(mode)
+                updateToggleButtonColors(buttonId)
+            }
         }
 
         binding.modeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -120,7 +128,12 @@ class MainActivity : AppCompatActivity() {
 
                     currentMode = newMode
                     viewModel.filterDataByType(currentMode)
+
+                    lifecycleScope.launch {
+                        DataStoreManager.saveMode(this@MainActivity, newMode.name)
+                    }
                 }
+
                 updateToggleButtonColors(checkedId)
             }
         }
@@ -295,7 +308,6 @@ class MainActivity : AppCompatActivity() {
         selectedButton.setTextColor(Color.WHITE)
     }
 }
-
 
 
 
