@@ -8,7 +8,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Rational
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -71,6 +73,8 @@ class MainActivity : AppCompatActivity() {
         miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
         miniPlayerView = findViewById(R.id.miniPlayerView)
 
+        makeMiniPlayerDraggable()
+
         ModeStateManager.syncFromLiveData(viewModel.selectedMode)
 
         setSupportActionBar(binding.toolbar)
@@ -78,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewSongs.setHasFixedSize(true)
+
+        player = ExoPlayer.Builder(this).build()
 
         binding.progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -154,6 +160,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun makeMiniPlayerDraggable() {
+        var dX = 0f
+        var dY = 0f
+
+        miniPlayerFrame.setOnTouchListener(OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    dX = view.x - event.rawX
+                    dY = view.y - event.rawY
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    view.animate()
+                        .x(event.rawX + dX)
+                        .y(event.rawY + dY)
+                        .setDuration(0)
+                        .start()
+                }
+            }
+            true
+        })
+    }
     private fun setupPlayer(songs: List<DataModel>) {
         playerManager = PlayerManager.getInstance(this).apply {
             setPlaylist(songs)
@@ -188,18 +215,17 @@ class MainActivity : AppCompatActivity() {
                     if (::player.isInitialized) {
                         player.stop()
                         player.clearMediaItems()
+                        binding.pipPlayerView.player = null
+                        miniPlayerView.player = null
                     }
                     playerManager?.togglePlayback(index)
                     updateNowPlaying()
 
-                    binding.pipPlayerView.hide()
-
                     if (miniPlayerFrame.visibility == View.VISIBLE) {
                         exitMiniPlayerMode()
                     }
-                    binding.pipPlayerView.hide()
-                    binding.recyclerViewSongs.show()
 
+                    binding.recyclerViewSongs.show()
                     binding.toolbar.show()
                     binding.modeToggleGroup.show()
                     binding.imageViewNowPlayingIcon.show()
@@ -207,7 +233,6 @@ class MainActivity : AppCompatActivity() {
                     binding.progressBar.show()
                     binding.textViewCurrentTitle.show()
                 }
-
 
                 triggerWidgetUpdate()
                 if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
@@ -328,6 +353,7 @@ class MainActivity : AppCompatActivity() {
         selectedButton.setTextColor(Color.WHITE)
     }
 }
+
 
 
 
