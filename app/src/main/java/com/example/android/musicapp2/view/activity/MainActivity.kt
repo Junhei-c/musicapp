@@ -5,12 +5,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Rational
-import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnTouchListener
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +18,6 @@ import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ActivityMainBinding
-import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.model.MediaTypeEnum
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
@@ -30,7 +25,11 @@ import com.example.android.musicapp2.state.ModeStateManager
 import com.example.android.musicapp2.utils.datastore.DataStoreManager
 import com.example.android.musicapp2.utils.extensions.hide
 import com.example.android.musicapp2.utils.extensions.show
+import com.example.android.musicapp2.utils.init.PlayerInitializer
 import com.example.android.musicapp2.utils.manager.PlayerManager
+import com.example.android.musicapp2.utils.ui.MiniPlayerDragger
+import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
+import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
@@ -44,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: SongAdapter
     private lateinit var player: ExoPlayer
     private var playerManager: PlayerManager? = null
+    private lateinit var playerInitializer: PlayerInitializer
     private var lastPlayingIndex: Int = -1
     private var selectedIndex: Int = -1
     private var currentMode: MediaTypeEnum = MediaTypeEnum.AUDIO
@@ -55,16 +55,6 @@ class MainActivity : AppCompatActivity() {
         MainViewModelFactory(DataRepository())
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val progressUpdater = object : Runnable {
-        override fun run() {
-            playerManager?.takeIf { it.isPlaying() }?.let {
-                binding.progressBar.progress = it.getPlaybackPercentage()
-                handler.postDelayed(this, 1000)
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -73,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
         miniPlayerView = findViewById(R.id.miniPlayerView)
 
-        makeMiniPlayerDraggable()
+        MiniPlayerDragger.makeDraggable(miniPlayerFrame)
 
         ModeStateManager.syncFromLiveData(viewModel.selectedMode)
 
@@ -123,161 +113,95 @@ class MainActivity : AppCompatActivity() {
                 val newMode = if (checkedId == R.id.buttonAudio) MediaTypeEnum.AUDIO else MediaTypeEnum.VIDEO
 
                 if (newMode != currentMode) {
-                    if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO &&
-                        ::player.isInitialized && player.isPlaying
-                    ) {
+                    if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO && ::player.isInitialized && player.isPlaying) {
                         enterMiniPlayerMode()
                     }
-
-                    if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO &&
-                        miniPlayerFrame.visibility == View.VISIBLE
-                    ) {
+                    if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO && miniPlayerFrame.visibility == View.VISIBLE) {
                         exitMiniPlayerMode()
                     }
 
                     currentMode = newMode
                     viewModel.filterDataByType(currentMode)
-
                     lifecycleScope.launch {
                         DataStoreManager.saveMode(this@MainActivity, newMode.name)
                     }
                 }
-
                 updateToggleButtonColors(checkedId)
             }
         }
 
         viewModel.data.observe(this) { songs ->
             if (!::adapter.isInitialized) {
-                setupAdapter(songs)
+                adapter = PlayerUiBinder.bindAdapter(
+                    binding = binding,
+                    songs = songs,
+                    selectedIndex = selectedIndex,
+                    onSongClick = { song, index ->
+                        val previousIndex = selectedIndex
+                        selectedIndex = index
+                        if (song.mediaType == MediaTypeEnum.VIDEO) {
+                            playVideoInline(song.url)
+                        } else {
+                            if (::player.isInitialized) {
+                                player.stop()
+                                player.clearMediaItems()
+                                binding.pipPlayerView.player = null
+                                miniPlayerView.player = null
+                            }
+                            playerManager?.playSongAt(index)
+                            NowPlayingUpdater.update(binding, playerManager!!)
+                            if (miniPlayerFrame.visibility == View.VISIBLE) exitMiniPlayerMode()
+                            PlayerUiBinder.showAudioUI(binding)
+                        }
+                        triggerWidgetUpdate()
+                        if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
+                        adapter.notifyItemChanged(index)
+                    },
+                    isItemPlaying = { index -> index == selectedIndex }
+                )
             } else {
                 adapter.updateSongs(songs)
             }
+
             if (playerManager == null) {
-                setupPlayer(songs)
-                setupPlaybackControls()
+                playerManager = PlayerManager.getInstance(this)
+                playerInitializer = PlayerInitializer(
+                    playerManager!!,
+                    onUpdate = { prev, curr ->
+                        lastPlayingIndex = curr
+                        selectedIndex = curr
+                        if (prev != -1) adapter.notifyItemChanged(prev)
+                        if (curr != -1) adapter.notifyItemChanged(curr)
+                        triggerWidgetUpdate()
+                    },
+                    onUiUpdate = { NowPlayingUpdater.update(binding, playerManager!!) }
+                )
+                playerInitializer.initialize(songs)
+            } else {
+                playerManager?.setPlaylist(songs)
             }
         }
-    }
 
-    private fun makeMiniPlayerDraggable() {
-        var dX = 0f
-        var dY = 0f
-
-        miniPlayerFrame.setOnTouchListener(OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    dX = view.x - event.rawX
-                    dY = view.y - event.rawY
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    view.animate()
-                        .x(event.rawX + dX)
-                        .y(event.rawY + dY)
-                        .setDuration(0)
-                        .start()
-                }
-            }
-            true
-        })
-    }
-    private fun setupPlayer(songs: List<DataModel>) {
-        playerManager = PlayerManager.getInstance(this).apply {
-            setPlaylist(songs)
-            setOnPlaybackChangedListener {
-                val previousIndex = lastPlayingIndex
-                lastPlayingIndex = currentIndex
-                selectedIndex = currentIndex
-                updateNowPlaying()
-
-                if (::adapter.isInitialized) {
-                    if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
-                    if (currentIndex != -1) adapter.notifyItemChanged(currentIndex)
-                }
-
-                handler.removeCallbacks(progressUpdater)
-                if (isPlaying()) handler.post(progressUpdater)
-                triggerWidgetUpdate()
-            }
-        }
-    }
-
-    private fun setupAdapter(songs: List<DataModel>) {
-        adapter = SongAdapter(
-            songs = songs,
-            onSongClick = { song, index ->
-                val previousIndex = selectedIndex
-                selectedIndex = index
-
-                if (song.mediaType == MediaTypeEnum.VIDEO) {
-                    playVideoInline(song.url)
-                } else {
-                    if (::player.isInitialized) {
-                        player.stop()
-                        player.clearMediaItems()
-                        binding.pipPlayerView.player = null
-                        miniPlayerView.player = null
-                    }
-                    playerManager?.togglePlayback(index)
-                    updateNowPlaying()
-
-                    if (miniPlayerFrame.visibility == View.VISIBLE) {
-                        exitMiniPlayerMode()
-                    }
-
-                    binding.recyclerViewSongs.show()
-                    binding.toolbar.show()
-                    binding.modeToggleGroup.show()
-                    binding.imageViewNowPlayingIcon.show()
-                    binding.buttonPlayPause.show()
-                    binding.progressBar.show()
-                    binding.textViewCurrentTitle.show()
-                }
-
-                triggerWidgetUpdate()
-                if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
-                adapter.notifyItemChanged(index)
-            },
-            isItemPlaying = { index -> index == selectedIndex }
-        )
-        binding.recyclerViewSongs.adapter = adapter
-    }
-
-    private fun setupPlaybackControls() {
         binding.buttonPlayPause.setOnClickListener {
             playerManager?.currentIndex?.takeIf { it != -1 }?.let {
-                playerManager?.togglePlayback(it)
-                updateNowPlaying()
+                playerManager?.playSongAt(it)
+                NowPlayingUpdater.update(binding, playerManager!!)
                 triggerWidgetUpdate()
                 adapter.notifyItemChanged(it)
             }
         }
     }
 
-    private fun updateNowPlaying() {
-        val song = playerManager?.getCurrentData()
-        val isPlaying = playerManager?.isPlaying() == true
-        binding.textViewCurrentTitle.text = song?.name.orEmpty()
-        song?.imageRes?.let { binding.imageViewNowPlayingIcon.setImageResource(it) }
-        binding.buttonPlayPause.setImageResource(
-            if (isPlaying) R.drawable.iconparkpauseone else R.drawable.iconparkplay
-        )
-        binding.progressBar.progress = playerManager?.getPlaybackPercentage() ?: 0
-    }
-
     private fun playVideoInline(mediaUrl: String) {
         if (!::player.isInitialized) {
             player = ExoPlayer.Builder(this).build()
         }
-
         player.setMediaItem(MediaItem.fromUri(mediaUrl))
         player.prepare()
         player.playWhenReady = true
-
         binding.pipPlayerView.player = player
         binding.pipPlayerView.visibility = View.VISIBLE
         binding.pipPlayerView.show()
-
         binding.toolbar.hide()
         binding.imageViewNowPlayingIcon.hide()
         binding.buttonPlayPause.hide()
@@ -289,7 +213,6 @@ class MainActivity : AppCompatActivity() {
         binding.nowPlayingCard.hide()
         miniPlayerFrame.show()
         miniPlayerView.player = player
-
         binding.toolbar.show()
         binding.imageViewNowPlayingIcon.show()
         binding.buttonPlayPause.show()
@@ -314,9 +237,7 @@ class MainActivity : AppCompatActivity() {
     override fun onUserLeaveHint() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ::player.isInitialized && player.isPlaying) {
             enterPictureInPictureMode(
-                PictureInPictureParams.Builder()
-                    .setAspectRatio(pipAspectRatio)
-                    .build()
+                PictureInPictureParams.Builder().setAspectRatio(pipAspectRatio).build()
             )
         }
         super.onUserLeaveHint()
@@ -326,17 +247,14 @@ class MainActivity : AppCompatActivity() {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
         if (isInPictureInPictureMode) {
             binding.modeToggleGroup.hide()
-        } else {
-            if (currentMode == MediaTypeEnum.VIDEO) {
-                binding.modeToggleGroup.show()
-            }
+        } else if (currentMode == MediaTypeEnum.VIDEO) {
+            binding.modeToggleGroup.show()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(progressUpdater)
-        playerManager?.release()
+        playerInitializer.release()
         if (::player.isInitialized) player.release()
     }
 
@@ -353,7 +271,3 @@ class MainActivity : AppCompatActivity() {
         selectedButton.setTextColor(Color.WHITE)
     }
 }
-
-
-
-

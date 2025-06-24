@@ -22,17 +22,21 @@ object MusicController {
 
     fun playByMode(context: Context, mode: Int) {
         val player = getPlayer(context)
-        when (mode) {
-            0 -> player.play(2)
-            1 -> player.play(0)
-            2 -> player.play(1)
-            else -> player.play(0)
+        val index = when (mode) {
+            0 -> 2
+            1 -> 0
+            2 -> 1
+            else -> 0
         }
+        player.playSongAt(index)
     }
 
-    fun isPlaying(context: Context): Boolean = getPlayer(context).isPlaying()
+    fun isPlaying(context: Context): Boolean =
+        getPlayer(context).isPlaying()
 
-    fun getCurrentSong(context: Context) = getPlayer(context).getCurrentData()
+    fun getCurrentSong(context: Context) =
+        getPlayer(context).getCurrentData()
 
-    fun getProgress(context: Context) = getPlayer(context).getPlaybackPercentage()
+    fun getProgress(context: Context) =
+        getPlayer(context).getPlaybackPercentage()
 }

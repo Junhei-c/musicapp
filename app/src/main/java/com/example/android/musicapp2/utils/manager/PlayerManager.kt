@@ -38,62 +38,47 @@ class PlayerManager private constructor(private val context: Context) {
         player.playWhenReady = false
     }
 
-    fun prepareOnly(index: Int) {
-        val data = playlist.getOrNull(index) ?: return
-        val mediaItem = MediaItem.fromUri(data.url)
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        player.playWhenReady = false
-        currentIndex = index
-    }
+    fun playSongAt(index: Int) {
+        if (index in playlist.indices && (index != currentIndex || !player.isPlaying)) {
+            val song = playlist[index]
+            val mediaItem = MediaItem.Builder()
+                .setUri(song.url)
+                .setMediaMetadata(MediaMetadata.Builder().setTitle(song.name).build())
+                .build()
 
-    fun setMediaItem(index: Int) {
-        val data = playlist.getOrNull(index) ?: return
-        val mediaItem = MediaItem.fromUri(data.url)
-        player.setMediaItem(mediaItem)
-        currentIndex = index
-    }
-
-    fun play(index: Int) {
-        if (index in playlist.indices) {
+            player.setMediaItem(mediaItem)
+            player.prepare()
+            player.play()
             currentIndex = index
-            val media = playlist[index]
-            player.seekTo(index, 0)
-            player.playWhenReady = true
-            onPlaybackChanged?.invoke()
         }
     }
 
-    fun pause() {
-        player.playWhenReady = false
-        onPlaybackChanged?.invoke()
-    }
-
     fun togglePlayback(index: Int) {
-        if (currentIndex == index && isPlaying()) {
-            player.pause()
-        } else {
-            val data = playlist.getOrNull(index) ?: return
-            val mediaItem = MediaItem.fromUri(data.url)
-            player.setMediaItem(mediaItem)
-            player.prepare()
-            player.playWhenReady = true
-            currentIndex = index
+        if (index in playlist.indices) {
+            if (currentIndex == index && isPlaying()) {
+                player.pause()
+            } else {
+                playSongAt(index)
+            }
         }
     }
 
     fun playNext() {
         if (playlist.isNotEmpty()) {
             val nextIndex = (currentIndex + 1) % playlist.size
-            play(nextIndex)
+            playSongAt(nextIndex)
         }
     }
 
     fun playPrevious() {
         if (playlist.isNotEmpty()) {
             val prevIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
-            play(prevIndex)
+            playSongAt(prevIndex)
         }
+    }
+
+    fun pause() {
+        player.pause()
     }
 
     fun isPlaying(): Boolean = player.isPlaying
