@@ -21,14 +21,19 @@ class SongAdapter(
             val isPlaying = isItemPlaying(position)
 
             textViewSongName.text = song.name
+
             imageViewIcon.apply {
                 visibility = if (isPlaying) View.VISIBLE else View.INVISIBLE
                 setImageResource(R.drawable.group)
             }
 
-            buttonPlay.setImageResource(if (isPlaying) R.drawable.pause else R.drawable.play)
+            buttonPlay.setImageResource(
+                if (isPlaying) R.drawable.pause else R.drawable.play
+            )
+
             cardViewItem.setBackgroundResource(
-                if (isPlaying) R.drawable.bg_mode_selected else R.drawable.bg_mode_unselected
+                if (isPlaying) R.drawable.bg_mode_selected
+                else R.drawable.bg_mode_unselected
             )
 
             val clickListener = View.OnClickListener {
@@ -44,7 +49,9 @@ class SongAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
-        val binding = ItemSongBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemSongBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
         return SongViewHolder(binding)
     }
 
@@ -61,4 +68,3 @@ class SongAdapter(
         notifyDataSetChanged()
     }
 }
-
