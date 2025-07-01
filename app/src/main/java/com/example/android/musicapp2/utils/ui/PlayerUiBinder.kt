@@ -5,6 +5,7 @@ import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.utils.extensions.show
 import com.example.android.musicapp2.view.adapter.SongAdapter
 
+
 object PlayerUiBinder {
 
     fun bindAdapter(
@@ -15,11 +16,11 @@ object PlayerUiBinder {
         isItemPlaying: (Int) -> Boolean
     ): SongAdapter {
         val adapter = SongAdapter(
-            songs = songs,
             onSongClick = onSongClick,
             isItemPlaying = isItemPlaying
         )
         binding.recyclerViewSongs.adapter = adapter
+        adapter.submitList(songs)
         return adapter
     }
 

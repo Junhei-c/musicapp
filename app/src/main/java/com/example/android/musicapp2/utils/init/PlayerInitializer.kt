@@ -1,5 +1,7 @@
 package com.example.android.musicapp2.utils.init
 
+import android.os.Handler
+import android.os.Looper
 import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.utils.manager.PlayerManager
 
@@ -11,17 +13,18 @@ class PlayerInitializer(
     private var lastKnownIndex = -1
 
     fun initialize(songs: List<DataModel>) {
-        playerManager.setPlaylist(songs)
+        Handler(Looper.getMainLooper()).post {
+            playerManager.setPlaylist(songs)
 
-        playerManager.setOnPlaybackChangedListener {
-            val prev = lastKnownIndex
-            val curr = playerManager.currentIndex
-            if (curr != prev) {
-                onUpdate(prev, curr)
-                lastKnownIndex = curr
+            playerManager.setOnPlaybackChangedListener {
+                val prev = lastKnownIndex
+                val curr = playerManager.currentIndex
+                if (curr != prev) {
+                    onUpdate(prev, curr)
+                    lastKnownIndex = curr
+                }
+                onUiUpdate()
             }
-            onUiUpdate()
         }
     }
 }
-

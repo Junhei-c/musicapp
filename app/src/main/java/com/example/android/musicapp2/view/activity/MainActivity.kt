@@ -1,8 +1,10 @@
 package com.example.android.musicapp2.view.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Rational
+import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -26,7 +28,6 @@ import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.utils.mode.ModeToggleHandler
 import com.example.android.musicapp2.utils.pip.PictureInPictureHelper
 import com.example.android.musicapp2.utils.player.PlayerController
-import com.example.android.musicapp2.utils.ui.MiniPlayerDragger
 import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
 import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.utils.ui.UiController
@@ -61,7 +62,8 @@ class MainActivity : AppCompatActivity() {
         miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
         miniPlayerView = findViewById(R.id.miniPlayerView)
 
-        MiniPlayerDragger.makeDraggable(miniPlayerFrame)
+        makeMiniPlayerDraggable(miniPlayerFrame)
+
         setSupportActionBar(binding.toolbar)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
@@ -76,6 +78,7 @@ class MainActivity : AppCompatActivity() {
                     playerManager?.seekTo(duration * progress / 100)
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
@@ -147,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                     isItemPlaying = { index -> index == selectedIndex }
                 )
             } else {
-                adapter.updateSongs(songs)
+                adapter.submitList(songs)
             }
 
             if (playerManager == null) {
@@ -212,6 +215,25 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.startForegroundService(this, intent)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun makeMiniPlayerDraggable(view: View) {
+        var dX = 0f
+        var dY = 0f
+        view.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    dX = event.rawX - v.x
+                    dY = event.rawY - v.y
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    v.x = event.rawX - dX
+                    v.y = event.rawY - dY
+                }
+            }
+            true
+        }
+    }
+
     override fun onUserLeaveHint() {
         PictureInPictureHelper.enterPipMode(this, ::player.isInitialized, pipAspectRatio)
         super.onUserLeaveHint()
@@ -227,4 +249,3 @@ class MainActivity : AppCompatActivity() {
         LifecycleManager.cleanUp(playerInitializer, player)
     }
 }
-

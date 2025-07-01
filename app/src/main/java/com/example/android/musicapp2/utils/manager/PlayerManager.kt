@@ -1,6 +1,8 @@
 package com.example.android.musicapp2.utils.manager
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -10,6 +12,8 @@ import com.example.android.musicapp2.model.DataModel
 class PlayerManager private constructor(private val context: Context) {
 
     private val player: ExoPlayer = ExoPlayer.Builder(context).build()
+    private val handler = Handler(Looper.getMainLooper())
+
     private var playlist: List<DataModel> = emptyList()
     var currentIndex: Int = -1
         private set
@@ -33,9 +37,11 @@ class PlayerManager private constructor(private val context: Context) {
                 .setMediaMetadata(MediaMetadata.Builder().setTitle(it.name).build())
                 .build()
         }
-        player.setMediaItems(mediaItems)
-        player.prepare()
-        player.playWhenReady = false
+        handler.post {
+            player.setMediaItems(mediaItems)
+            player.prepare()
+            player.playWhenReady = false
+        }
     }
 
     fun playSongAt(index: Int) {
@@ -46,17 +52,19 @@ class PlayerManager private constructor(private val context: Context) {
                 .setMediaMetadata(MediaMetadata.Builder().setTitle(song.name).build())
                 .build()
 
-            player.setMediaItem(mediaItem)
-            player.prepare()
-            player.play()
-            currentIndex = index
+            handler.post {
+                player.setMediaItem(mediaItem)
+                player.prepare()
+                player.play()
+                currentIndex = index
+            }
         }
     }
 
     fun togglePlayback(index: Int) {
         if (index in playlist.indices) {
             if (currentIndex == index && isPlaying()) {
-                player.pause()
+                handler.post { player.pause() }
             } else {
                 playSongAt(index)
             }
@@ -78,7 +86,7 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun pause() {
-        player.pause()
+        handler.post { player.pause() }
     }
 
     fun isPlaying(): Boolean = player.isPlaying
@@ -91,7 +99,7 @@ class PlayerManager private constructor(private val context: Context) {
 
     fun getDuration(): Long = player.duration
     fun getCurrentPosition(): Long = player.currentPosition
-    fun seekTo(positionMs: Long) = player.seekTo(positionMs)
+    fun seekTo(positionMs: Long) = handler.post { player.seekTo(positionMs) }
     fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
     fun setOnPlaybackChangedListener(listener: () -> Unit) { onPlaybackChanged = listener }
     fun release() = player.release()
