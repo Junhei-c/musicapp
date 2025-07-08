@@ -34,8 +34,9 @@ class PlayerManager private constructor(private val context: Context) {
         val mediaItems = data.map {
             MediaItem.Builder()
                 .setUri(it.url)
-                .setMediaMetadata(MediaMetadata.Builder().setTitle(it.name).build())
-                .build()
+                .setMediaMetadata(
+                    MediaMetadata.Builder().setTitle(it.name).build()
+                ).build()
         }
         handler.post {
             player.setMediaItems(mediaItems)
@@ -45,19 +46,22 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun playSongAt(index: Int) {
-        if (index in playlist.indices && (index != currentIndex || !player.isPlaying)) {
-            val song = playlist[index]
-            val mediaItem = MediaItem.Builder()
-                .setUri(song.url)
-                .setMediaMetadata(MediaMetadata.Builder().setTitle(song.name).build())
-                .build()
+        if (index !in playlist.indices || (index == currentIndex && player.isPlaying)) return
 
-            handler.post {
-                player.setMediaItem(mediaItem)
-                player.prepare()
-                player.play()
-                currentIndex = index
-            }
+        val song = playlist[index]
+        val mediaItem = MediaItem.Builder()
+            .setUri(song.url)
+            .setMediaMetadata(
+                MediaMetadata.Builder().setTitle(song.name).build()
+            ).build()
+
+        currentIndex = index
+
+        handler.post {
+            player.setMediaItem(mediaItem)
+            player.prepare()
+            player.play()
+            onPlaybackChanged?.invoke()
         }
     }
 
@@ -90,29 +94,50 @@ class PlayerManager private constructor(private val context: Context) {
     }
 
     fun isPlaying(): Boolean = player.isPlaying
-
+    fun getDuration(): Long = player.duration
+    fun getCurrentPosition(): Long = player.currentPosition
     fun getPlaybackPercentage(): Int {
         val duration = player.duration
         val position = player.currentPosition
         return if (duration > 0) ((position * 100) / duration).toInt() else 0
     }
 
-    fun getDuration(): Long = player.duration
-    fun getCurrentPosition(): Long = player.currentPosition
-    fun seekTo(positionMs: Long) = handler.post { player.seekTo(positionMs) }
     fun getCurrentData(): DataModel? = playlist.getOrNull(currentIndex)
-    fun setOnPlaybackChangedListener(listener: () -> Unit) { onPlaybackChanged = listener }
+    fun getExoPlayer(): ExoPlayer = player
+    fun seekTo(positionMs: Long) = handler.post { player.seekTo(positionMs) }
+    fun setOnPlaybackChangedListener(listener: () -> Unit) {
+        onPlaybackChanged = listener
+    }
+
+    fun seekTo(index: Int) {
+        if (index in playlist.indices) {
+            currentIndex = index
+            handler.post {
+                player.seekTo(index, 0)
+                onPlaybackChanged?.invoke()
+            }
+        }
+    }
+
+    fun resume() {
+        handler.post {
+            player.play()
+            onPlaybackChanged?.invoke()
+        }
+    }
+
+
     fun release() = player.release()
 
     companion object {
         @Volatile private var instance: PlayerManager? = null
+
         fun getInstance(context: Context): PlayerManager =
             instance ?: synchronized(this) {
                 instance ?: PlayerManager(context.applicationContext).also { instance = it }
             }
     }
 }
-
 
 
 

@@ -1,10 +1,8 @@
 package com.example.android.musicapp2.view.activity
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Rational
-import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -28,6 +26,7 @@ import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.utils.mode.ModeToggleHandler
 import com.example.android.musicapp2.utils.pip.PictureInPictureHelper
 import com.example.android.musicapp2.utils.player.PlayerController
+import com.example.android.musicapp2.utils.ui.MiniPlayerDragger
 import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
 import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.utils.ui.UiController
@@ -49,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var miniPlayerFrame: FrameLayout
     private lateinit var miniPlayerView: PlayerView
+    private lateinit var pipPlayerView: PlayerView
 
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(DataRepository())
@@ -59,16 +59,24 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
-        miniPlayerView = findViewById(R.id.miniPlayerView)
 
-        makeMiniPlayerDraggable(miniPlayerFrame)
+        miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
+
+        miniPlayerView = findViewById(R.id.miniPlayerView)
+        pipPlayerView = findViewById(R.id.pipPlayerView)
+
+        MiniPlayerDragger.makeDraggable(miniPlayerView)
+        MiniPlayerDragger.makeDraggable(pipPlayerView)
+
 
         setSupportActionBar(binding.toolbar)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
 
-        binding.recyclerViewSongs.layoutManager = LinearLayoutManager(this)
-        binding.recyclerViewSongs.setHasFixedSize(true)
+        binding.recyclerViewSongs.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            setHasFixedSize(true)
+        }
+
         player = ExoPlayer.Builder(this).build()
 
         binding.progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -78,7 +86,6 @@ class MainActivity : AppCompatActivity() {
                     playerManager?.seekTo(duration * progress / 100)
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
@@ -135,11 +142,19 @@ class MainActivity : AppCompatActivity() {
                             if (::player.isInitialized) {
                                 player.stop()
                                 player.clearMediaItems()
-                                binding.pipPlayerView.player = null
-                                miniPlayerView.player = null
                             }
-                            playerManager?.playSongAt(index)
+
+                            playerManager?.seekTo(index)
+                            playerManager?.resume()
+
+
+
+                            val exo = playerManager?.getExoPlayer()
+                            miniPlayerView.player = exo
+                            pipPlayerView.player = exo
+
                             NowPlayingUpdater.update(binding, playerManager!!)
+
                             if (miniPlayerFrame.visibility == View.VISIBLE) exitMiniPlayerMode()
                             UiController.showAudioUI(binding)
                         }
@@ -188,9 +203,9 @@ class MainActivity : AppCompatActivity() {
         player.setMediaItem(MediaItem.fromUri(mediaUrl))
         player.prepare()
         player.playWhenReady = true
-        binding.pipPlayerView.player = player
-        binding.pipPlayerView.visibility = View.VISIBLE
-        binding.pipPlayerView.show()
+        pipPlayerView.player = player
+        pipPlayerView.visibility = View.VISIBLE
+        pipPlayerView.show()
         UiController.hideAudioUI(binding)
     }
 
@@ -199,13 +214,13 @@ class MainActivity : AppCompatActivity() {
         miniPlayerFrame.visibility = View.VISIBLE
         miniPlayerView.player = player
         UiController.showAudioUI(binding)
-        binding.pipPlayerView.visibility = View.GONE
+        pipPlayerView.visibility = View.GONE
     }
 
     private fun exitMiniPlayerMode() {
         miniPlayerFrame.visibility = View.GONE
         binding.nowPlayingCard.visibility = View.VISIBLE
-        binding.pipPlayerView.player = player
+        pipPlayerView.player = player
     }
 
     private fun triggerWidgetUpdate() {
@@ -213,25 +228,6 @@ class MainActivity : AppCompatActivity() {
             action = getString(R.string.widget_action_refresh)
         }
         ContextCompat.startForegroundService(this, intent)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun makeMiniPlayerDraggable(view: View) {
-        var dX = 0f
-        var dY = 0f
-        view.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    dX = event.rawX - v.x
-                    dY = event.rawY - v.y
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    v.x = event.rawX - dX
-                    v.y = event.rawY - dY
-                }
-            }
-            true
-        }
     }
 
     override fun onUserLeaveHint() {
@@ -249,3 +245,4 @@ class MainActivity : AppCompatActivity() {
         LifecycleManager.cleanUp(playerInitializer, player)
     }
 }
+
