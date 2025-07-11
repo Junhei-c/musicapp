@@ -1,5 +1,7 @@
 package com.example.android.musicapp2.view.activity
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Rational
@@ -9,7 +11,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,17 +20,19 @@ import com.example.android.musicapp2.model.MediaTypeEnum
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.utils.datastore.DataStoreManager
-import com.example.android.musicapp2.utils.extensions.show
 import com.example.android.musicapp2.utils.init.PlayerInitializer
 import com.example.android.musicapp2.utils.lifecycle.LifecycleManager
 import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.utils.mode.ModeToggleHandler
 import com.example.android.musicapp2.utils.pip.PictureInPictureHelper
 import com.example.android.musicapp2.utils.player.PlayerController
-import com.example.android.musicapp2.utils.ui.MiniPlayerDragger
+import com.example.android.musicapp2.utils.ui.MiniPlayerHandler
+import com.example.android.musicapp2.utils.ui.NotificationHelper
+import com.example.android.musicapp2.utils.ui.NotificationHelper.SongInteractionHandler
 import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
 import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.utils.ui.UiController
+import com.example.android.musicapp2.utils.widget.WidgetUpdater
 import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
@@ -59,15 +62,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
-
         miniPlayerView = findViewById(R.id.miniPlayerView)
         pipPlayerView = findViewById(R.id.pipPlayerView)
 
-        MiniPlayerDragger.makeDraggable(miniPlayerView)
-        MiniPlayerDragger.makeDraggable(pipPlayerView)
-
+        MiniPlayerHandler.makeDraggable(miniPlayerView)
+        MiniPlayerHandler.makeDraggable(pipPlayerView)
 
         setSupportActionBar(binding.toolbar)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.black)
@@ -111,11 +111,11 @@ class MainActivity : AppCompatActivity() {
                     checkedId = checkedId,
                     currentMode = currentMode,
                     onModeChanged = { newMode ->
-                        if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO && ::player.isInitialized && player.isPlaying) {
-                            enterMiniPlayerMode()
+                        if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO && player.isPlaying) {
+                            MiniPlayerHandler.enterMiniPlayerMode(binding, player)
                         }
                         if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO && miniPlayerFrame.visibility == View.VISIBLE) {
-                            exitMiniPlayerMode()
+                            MiniPlayerHandler.exitMiniPlayerMode(binding, player)
                         }
                         currentMode = newMode
                         viewModel.filterDataByType(newMode)
@@ -136,29 +136,24 @@ class MainActivity : AppCompatActivity() {
                     onSongClick = { song, index ->
                         val previousIndex = selectedIndex
                         selectedIndex = index
+
                         if (song.mediaType == MediaTypeEnum.VIDEO) {
-                            playVideoInline(song.url)
+                            SongInteractionHandler.handleVideoClick(binding, player, song.url)
                         } else {
-                            if (::player.isInitialized) {
-                                player.stop()
-                                player.clearMediaItems()
+                            playerManager?.getExoPlayer()?.let { exo ->
+                                SongInteractionHandler.handleAudioClick(
+                                    binding = binding,
+                                    song = song,
+                                    index = index,
+                                    playerManager = playerManager!!,
+                                    exoPlayer = exo,
+                                    miniPlayerView = miniPlayerView,
+                                    pipPlayerView = pipPlayerView,
+                                    onWidgetUpdate = { WidgetUpdater.updateStandard(this) }
+                                )
                             }
-
-                            playerManager?.seekTo(index)
-                            playerManager?.resume()
-
-
-
-                            val exo = playerManager?.getExoPlayer()
-                            miniPlayerView.player = exo
-                            pipPlayerView.player = exo
-
-                            NowPlayingUpdater.update(binding, playerManager!!)
-
-                            if (miniPlayerFrame.visibility == View.VISIBLE) exitMiniPlayerMode()
-                            UiController.showAudioUI(binding)
                         }
-                        triggerWidgetUpdate()
+
                         if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
                         adapter.notifyItemChanged(index)
                     },
@@ -177,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                         selectedIndex = curr
                         if (prev != -1) adapter.notifyItemChanged(prev)
                         if (curr != -1) adapter.notifyItemChanged(curr)
-                        triggerWidgetUpdate()
+                        WidgetUpdater.updateStandard(this)
                     },
                     onUiUpdate = { NowPlayingUpdater.update(binding, playerManager!!) }
                 )
@@ -188,46 +183,27 @@ class MainActivity : AppCompatActivity() {
                     playerManager!!,
                     adapterNotify = { adapter.notifyItemChanged(it) },
                     updateUi = { NowPlayingUpdater.update(binding, playerManager!!) },
-                    refreshWidget = { triggerWidgetUpdate() }
+                    refreshWidget = { WidgetUpdater.updateStandard(this) }
                 )
             } else {
                 playerManager?.setPlaylist(songs)
             }
         }
-    }
 
-    private fun playVideoInline(mediaUrl: String) {
-        if (!::player.isInitialized) {
-            player = ExoPlayer.Builder(this).build()
+        binding.fabPlayPause.setOnClickListener {
+            playerManager?.let {
+                if (it.isPlaying()) it.pause() else it.resume()
+                NowPlayingUpdater.update(binding, it)
+                WidgetUpdater.updateStandard(this)
+
+                val song = it.getCurrentData()
+                val notif = NotificationHelper.createNotification(this, it.isPlaying(), song?.name ?: "")
+                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.notify(MusicService.NOTIFICATION_ID, notif)
+
+                ContextCompat.startForegroundService(this, Intent(this, MusicService::class.java))
+            }
         }
-        player.setMediaItem(MediaItem.fromUri(mediaUrl))
-        player.prepare()
-        player.playWhenReady = true
-        pipPlayerView.player = player
-        pipPlayerView.visibility = View.VISIBLE
-        pipPlayerView.show()
-        UiController.hideAudioUI(binding)
-    }
-
-    private fun enterMiniPlayerMode() {
-        binding.nowPlayingCard.visibility = View.GONE
-        miniPlayerFrame.visibility = View.VISIBLE
-        miniPlayerView.player = player
-        UiController.showAudioUI(binding)
-        pipPlayerView.visibility = View.GONE
-    }
-
-    private fun exitMiniPlayerMode() {
-        miniPlayerFrame.visibility = View.GONE
-        binding.nowPlayingCard.visibility = View.VISIBLE
-        pipPlayerView.player = player
-    }
-
-    private fun triggerWidgetUpdate() {
-        val intent = Intent(this, MusicService::class.java).apply {
-            action = getString(R.string.widget_action_refresh)
-        }
-        ContextCompat.startForegroundService(this, intent)
     }
 
     override fun onUserLeaveHint() {
@@ -245,4 +221,3 @@ class MainActivity : AppCompatActivity() {
         LifecycleManager.cleanUp(playerInitializer, player)
     }
 }
-

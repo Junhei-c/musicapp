@@ -26,6 +26,12 @@ class PlayerManager private constructor(private val context: Context) {
                 currentIndex = player.currentMediaItemIndex
                 onPlaybackChanged?.invoke()
             }
+
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_ENDED) {
+                    playNext()
+                }
+            }
         })
     }
 
@@ -125,7 +131,6 @@ class PlayerManager private constructor(private val context: Context) {
             onPlaybackChanged?.invoke()
         }
     }
-
 
     fun release() = player.release()
 

@@ -16,6 +16,7 @@
     <color name="widget_light_gray">#D3D3D3</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="yellow">#FFFF00</color>
     <color name="teal_200">#03DAC5</color>
     <color name="colorPrimary">@color/color_primary</color>
     <color name="colorPrimaryVariant">@color/color_primary_variant</color>
