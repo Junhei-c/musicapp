@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
-import com.example.android.musicapp2.service.MusicService
+import com.example.android.musicapp2.state.LikedSongsManager
 import com.example.android.musicapp2.utils.manager.PlayerManager
 
 class CircleWidget : AppWidgetProvider() {
@@ -35,9 +35,10 @@ class CircleWidget : AppWidgetProvider() {
             }
             ACTION_LIKE -> {
                 song?.let {
-                    if (!MusicService.likedSongs.add(it.id)) {
-                        MusicService.likedSongs.remove(it.id)
+                    if (!LikedSongsManager.likedSongs.add(it.id)) {
+                        LikedSongsManager.likedSongs.remove(it.id)
                     }
+
                 }
             }
         }
@@ -63,7 +64,7 @@ class CircleWidget : AppWidgetProvider() {
         )
         views.setImageViewResource(
             R.id.circle_like,
-            if (song?.id != null && MusicService.likedSongs.contains(song.id))
+            if (song?.id != null && LikedSongsManager.likedSongs.contains(song.id))
                 R.drawable.heart else R.drawable.whiteheart
         )
 

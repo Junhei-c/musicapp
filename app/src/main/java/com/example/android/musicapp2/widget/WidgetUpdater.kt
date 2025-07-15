@@ -6,7 +6,7 @@ import android.content.Context
 import android.widget.RemoteViews
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.controller.MusicController
-import com.example.android.musicapp2.service.MusicService
+import com.example.android.musicapp2.state.LikedSongsManager
 import com.example.android.musicapp2.state.ModeStateManager
 
 object WidgetUpdater {
@@ -35,7 +35,7 @@ object WidgetUpdater {
             views.setImageViewResource(playId, playIcon)
             views.setProgressBar(R.id.music_progress, 100, progress, false)
 
-            val likeIcon = if (song?.id != null && MusicService.likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart
+            val likeIcon = if (song?.id != null && LikedSongsManager.likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart
             val likeId = if (isExpanded) R.id.btn_fav else R.id.heart
             views.setImageViewResource(likeId, likeIcon)
 
@@ -79,7 +79,7 @@ object WidgetUpdater {
             val views = RemoteViews(context.packageName, R.layout.widget_circle)
             views.setImageViewResource(R.id.circle_album_art, song?.imageRes ?: R.drawable.earlybirds)
             views.setImageViewResource(R.id.circle_play, if (isPlaying) R.drawable.pausebt else R.drawable.bigplay)
-            views.setImageViewResource(R.id.circle_like, if (song?.id != null && MusicService.likedSongs.contains(song.id)) R.drawable.redheart else R.drawable.heart)
+            views.setImageViewResource(R.id.circle_like, if (song?.id != null && LikedSongsManager.likedSongs.contains(song.id)) R.drawable.redheart else R.drawable.heart)
 
             views.setOnClickPendingIntent(R.id.circle_play, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_PLAY_PAUSE))
             views.setOnClickPendingIntent(R.id.circle_like, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_LIKE))
