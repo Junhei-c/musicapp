@@ -153,7 +153,11 @@ class MainActivity : AppCompatActivity() {
                                     exoPlayer = exo,
                                     miniPlayerView = miniPlayerView,
                                     pipPlayerView = pipPlayerView,
-                                    onWidgetUpdate = { triggerWidgetUpdate() }
+                                    onWidgetUpdate = {
+                                        triggerWidgetUpdate()
+                                        binding.nowPlayingCard.visibility = View.VISIBLE
+                                        miniPlayerFrame.visibility = View.GONE
+                                    }
                                 )
                             }
                         }
@@ -219,7 +223,6 @@ class MainActivity : AppCompatActivity() {
         startService(intent)
     }
 
-
     override fun onUserLeaveHint() {
         PictureInPictureHelper.enterPipMode(this, ::player.isInitialized, pipAspectRatio)
         super.onUserLeaveHint()
@@ -235,6 +238,3 @@ class MainActivity : AppCompatActivity() {
         LifecycleManager.cleanUp(player)
     }
 }
-
-
-
