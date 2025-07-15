@@ -32,7 +32,15 @@ class MusicService : Service() {
         Log.d("MusicService", "Service started with intent: ${intent?.action}")
         createNotificationChannel()
 
-        when (intent?.action) {
+        val action = intent?.action
+
+        if (action == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.w("MusicService", "Missing action. Forcing fallback notification.")
+            val notif = NotificationHelper.createNotification(this, false, "Loading...")
+            startForeground(NOTIFICATION_ID, notif)
+        }
+
+        when (action) {
             ACTION_START_FOREGROUND -> {
                 val isPlaying = intent.getBooleanExtra("isPlaying", false)
                 val title = intent.getStringExtra("title") ?: "Now Playing"
@@ -72,9 +80,7 @@ class MusicService : Service() {
                 ModeStateManager.selectedMode = 2
             }
 
-            "REFRESH_WIDGET" -> {
-
-            }
+            "REFRESH_WIDGET" -> {}
         }
 
         CoroutineScope(Dispatchers.IO).launch {

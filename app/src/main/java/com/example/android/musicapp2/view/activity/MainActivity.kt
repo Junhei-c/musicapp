@@ -216,8 +216,9 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, MusicService::class.java).apply {
             action = "REFRESH_WIDGET"
         }
-        ContextCompat.startForegroundService(this, intent)
+        startService(intent)
     }
+
 
     override fun onUserLeaveHint() {
         PictureInPictureHelper.enterPipMode(this, ::player.isInitialized, pipAspectRatio)
@@ -231,8 +232,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        LifecycleManager.cleanUp(playerInitializer, player)
+        LifecycleManager.cleanUp(player)
     }
 }
+
 
 

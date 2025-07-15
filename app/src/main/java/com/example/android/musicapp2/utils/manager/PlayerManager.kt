@@ -101,7 +101,6 @@ class PlayerManager private constructor(private val context: Context) {
 
     fun isPlaying(): Boolean = player.isPlaying
     fun getDuration(): Long = player.duration
-    fun getCurrentPosition(): Long = player.currentPosition
     fun getPlaybackPercentage(): Int {
         val duration = player.duration
         val position = player.currentPosition

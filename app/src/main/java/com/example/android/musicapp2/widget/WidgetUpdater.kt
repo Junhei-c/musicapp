@@ -26,22 +26,18 @@ object WidgetUpdater {
             val layoutId = if (isExpanded) R.layout.widget_expanded else R.layout.widget_now_playing
             val views = RemoteViews(context.packageName, layoutId)
 
-
             views.setTextViewText(R.id.widgetSongTitle, songTitle)
             if (!isExpanded) views.setTextViewText(R.id.widgetArtist, songArtist)
             song?.imageRes?.let { views.setImageViewResource(R.id.widgetAlbumArt, it) }
-
 
             val playIcon = if (isPlaying) R.drawable.pausebt else R.drawable.bigplay
             val playId = if (isExpanded) R.id.btn_play_pause else R.id.widgetPlay
             views.setImageViewResource(playId, playIcon)
             views.setProgressBar(R.id.music_progress, 100, progress, false)
 
-
             val likeIcon = if (song?.id != null && MusicService.likedSongs.contains(song.id)) R.drawable.heart else R.drawable.whiteheart
             val likeId = if (isExpanded) R.id.btn_fav else R.id.heart
             views.setImageViewResource(likeId, likeIcon)
-
 
             views.setOnClickPendingIntent(playId, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_PLAY_PAUSE))
             views.setOnClickPendingIntent(
@@ -53,7 +49,6 @@ object WidgetUpdater {
                 MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_PREV)
             )
             views.setOnClickPendingIntent(likeId, MyMusicWidget.getPendingIntent(context, MyMusicWidget.ACTION_LIKE))
-
 
             if (isExpanded) {
                 val selectedMode = ModeStateManager.selectedMode
