@@ -73,7 +73,7 @@ class MusicService : Service() {
             }
 
             "REFRESH_WIDGET" -> {
-                // Just update widgets
+
             }
         }
 
