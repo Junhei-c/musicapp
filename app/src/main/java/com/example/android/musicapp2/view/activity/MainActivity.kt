@@ -1,8 +1,8 @@
 package com.example.android.musicapp2.view.activity
 
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Rational
 import android.view.View
@@ -27,12 +27,10 @@ import com.example.android.musicapp2.utils.mode.ModeToggleHandler
 import com.example.android.musicapp2.utils.pip.PictureInPictureHelper
 import com.example.android.musicapp2.utils.player.PlayerController
 import com.example.android.musicapp2.utils.ui.MiniPlayerHandler
-import com.example.android.musicapp2.utils.ui.NotificationHelper
 import com.example.android.musicapp2.utils.ui.NotificationHelper.SongInteractionHandler
 import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
 import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.utils.ui.UiController
-import com.example.android.musicapp2.utils.widget.WidgetUpdater
 import com.example.android.musicapp2.view.adapter.SongAdapter
 import com.example.android.musicapp2.viewmodel.MainViewModel
 import com.example.android.musicapp2.viewmodel.MainViewModelFactory
@@ -61,6 +59,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
 
         miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
         miniPlayerView = findViewById(R.id.miniPlayerView)
@@ -149,7 +153,7 @@ class MainActivity : AppCompatActivity() {
                                     exoPlayer = exo,
                                     miniPlayerView = miniPlayerView,
                                     pipPlayerView = pipPlayerView,
-                                    onWidgetUpdate = { WidgetUpdater.updateStandard(this) }
+                                    onWidgetUpdate = { triggerWidgetUpdate() }
                                 )
                             }
                         }
@@ -172,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                         selectedIndex = curr
                         if (prev != -1) adapter.notifyItemChanged(prev)
                         if (curr != -1) adapter.notifyItemChanged(curr)
-                        WidgetUpdater.updateStandard(this)
+                        triggerWidgetUpdate()
                     },
                     onUiUpdate = { NowPlayingUpdater.update(binding, playerManager!!) }
                 )
@@ -183,7 +187,7 @@ class MainActivity : AppCompatActivity() {
                     playerManager!!,
                     adapterNotify = { adapter.notifyItemChanged(it) },
                     updateUi = { NowPlayingUpdater.update(binding, playerManager!!) },
-                    refreshWidget = { WidgetUpdater.updateStandard(this) }
+                    refreshWidget = { triggerWidgetUpdate() }
                 )
             } else {
                 playerManager?.setPlaylist(songs)
@@ -194,16 +198,25 @@ class MainActivity : AppCompatActivity() {
             playerManager?.let {
                 if (it.isPlaying()) it.pause() else it.resume()
                 NowPlayingUpdater.update(binding, it)
-                WidgetUpdater.updateStandard(this)
+                triggerWidgetUpdate()
 
                 val song = it.getCurrentData()
-                val notif = NotificationHelper.createNotification(this, it.isPlaying(), song?.name ?: "")
-                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(MusicService.NOTIFICATION_ID, notif)
+                val intent = Intent(this, MusicService::class.java).apply {
+                    action = MusicService.ACTION_START_FOREGROUND
+                    putExtra("isPlaying", it.isPlaying())
+                    putExtra("title", song?.name ?: "Now Playing")
+                }
 
-                ContextCompat.startForegroundService(this, Intent(this, MusicService::class.java))
+                ContextCompat.startForegroundService(this, intent)
             }
         }
+    }
+
+    private fun triggerWidgetUpdate() {
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = "REFRESH_WIDGET"
+        }
+        ContextCompat.startForegroundService(this, intent)
     }
 
     override fun onUserLeaveHint() {
@@ -221,3 +234,5 @@ class MainActivity : AppCompatActivity() {
         LifecycleManager.cleanUp(playerInitializer, player)
     }
 }
+
+

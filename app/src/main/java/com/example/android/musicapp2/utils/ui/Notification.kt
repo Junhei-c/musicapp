@@ -1,9 +1,7 @@
 package com.example.android.musicapp2.utils.ui
 
 import android.app.Notification
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
@@ -12,8 +10,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.android.musicapp2.R
 import com.example.android.musicapp2.databinding.ActivityMainBinding
-import com.example.android.musicapp2.model.Song
+import com.example.android.musicapp2.model.DataModel
 import com.example.android.musicapp2.service.MusicService
+import com.example.android.musicapp2.utils.extensions.show
 import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.widget.MyMusicWidget
 
@@ -67,7 +66,7 @@ object NotificationHelper {
 
         fun handleAudioClick(
             binding: ActivityMainBinding,
-            song: Song,
+            song: DataModel,
             index: Int,
             playerManager: PlayerManager,
             exoPlayer: ExoPlayer,

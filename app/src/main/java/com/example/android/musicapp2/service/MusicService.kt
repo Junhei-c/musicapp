@@ -9,10 +9,10 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import com.example.android.musicapp2.R
 import com.example.android.musicapp2.controller.MusicController
 import com.example.android.musicapp2.state.ModeStateManager
+import com.example.android.musicapp2.utils.ui.NotificationHelper
+import com.example.android.musicapp2.widget.MyMusicWidget
 import com.example.android.musicapp2.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,55 +24,56 @@ class MusicService : Service() {
     companion object {
         const val NOTIFICATION_ID = 1
         const val CHANNEL_ID = "music_service_channel"
+        const val ACTION_START_FOREGROUND = "start_foreground"
         val likedSongs = mutableSetOf<Int>()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("MusicService", "Service started with intent: ${intent?.action}")
-        startAsForegroundService()
+        createNotificationChannel()
 
         when (intent?.action) {
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_PLAY_PAUSE -> {
-                Log.d("MusicService", "ACTION_PLAY_PAUSE received")
+            ACTION_START_FOREGROUND -> {
+                val isPlaying = intent.getBooleanExtra("isPlaying", false)
+                val title = intent.getStringExtra("title") ?: "Now Playing"
+                val notification: Notification =
+                    NotificationHelper.createNotification(this, isPlaying, title)
+                startForeground(NOTIFICATION_ID, notification)
+            }
+
+            MyMusicWidget.ACTION_PLAY_PAUSE -> {
                 MusicController.togglePlayback(this)
             }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_NEXT -> {
-                Log.d("MusicService", "ACTION_NEXT received")
+            MyMusicWidget.ACTION_NEXT -> {
                 MusicController.playNext(this)
             }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_PREV -> {
-                Log.d("MusicService", "ACTION_PREV received")
+            MyMusicWidget.ACTION_PREV -> {
                 MusicController.playPrevious(this)
             }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_LIKE -> {
-                Log.d("MusicService", "ACTION_LIKE received")
+            MyMusicWidget.ACTION_LIKE -> {
                 toggleLike()
             }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE1 -> {
-                Log.d("MusicService", "ACTION_MODE1 received")
+            MyMusicWidget.ACTION_MODE1 -> {
                 MusicController.playByMode(this, 0)
                 ModeStateManager.selectedMode = 0
             }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE2 -> {
-                Log.d("MusicService", "ACTION_MODE2 received")
+            MyMusicWidget.ACTION_MODE2 -> {
                 MusicController.playByMode(this, 1)
                 ModeStateManager.selectedMode = 1
             }
 
-            com.example.android.musicapp2.widget.MyMusicWidget.ACTION_MODE3 -> {
-                Log.d("MusicService", "ACTION_MODE3 received")
+            MyMusicWidget.ACTION_MODE3 -> {
                 MusicController.playByMode(this, 2)
                 ModeStateManager.selectedMode = 2
             }
 
             "REFRESH_WIDGET" -> {
-                Log.d("MusicService", "REFRESH_WIDGET received")
-                // Let it fall through to widget update below
+                // Just update widgets
             }
         }
 
@@ -83,28 +84,21 @@ class MusicService : Service() {
             }
         }
 
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
-    private fun startAsForegroundService() {
+    private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Music Playback",
                 NotificationManager.IMPORTANCE_LOW
-            )
+            ).apply {
+                description = "Notification channel for music controls"
+            }
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
-
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Music Player")
-            .setContentText("Playing music")
-            .setSmallIcon(R.drawable.group)
-            .setOngoing(true)
-            .build()
-
-        startForeground(NOTIFICATION_ID, notification)
     }
 
     private fun toggleLike() {
@@ -116,3 +110,5 @@ class MusicService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
+
