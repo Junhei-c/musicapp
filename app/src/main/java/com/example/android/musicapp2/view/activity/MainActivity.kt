@@ -27,7 +27,7 @@ import com.example.android.musicapp2.utils.mode.ModeToggleHandler
 import com.example.android.musicapp2.utils.pip.PictureInPictureHelper
 import com.example.android.musicapp2.utils.player.PlayerController
 import com.example.android.musicapp2.utils.ui.MiniPlayerHandler
-import com.example.android.musicapp2.utils.ui.NotificationHelper.SongInteractionHandler
+import com.example.android.musicapp2.utils.ui.Notification.SongInteractionHandler
 import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
 import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.utils.ui.UiController

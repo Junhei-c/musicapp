@@ -1,6 +1,5 @@
 package com.example.android.musicapp2.service
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -11,12 +10,11 @@ import android.os.IBinder
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerNotificationManager
-import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.manager.PlayerManager
+import com.example.android.musicapp2.utils.ui.Notification
+import com.example.android.musicapp2.widget.MyMusicWidget
 import com.example.android.musicapp2.widget.WidgetUpdater
 
 class MusicService : Service() {
@@ -28,9 +26,9 @@ class MusicService : Service() {
     }
 
     private lateinit var player: ExoPlayer
-    private var playerNotificationManager: PlayerNotificationManager? = null
 
-    @OptIn(UnstableApi::class) override fun onCreate() {
+    @OptIn(UnstableApi::class)
+    override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
 
@@ -45,50 +43,47 @@ class MusicService : Service() {
             playWhenReady = true
         }
 
-        playerNotificationManager = PlayerNotificationManager.Builder(
-            this,
+        startForeground(
             NOTIFICATION_ID,
-            CHANNEL_ID
+            Notification.createNotification(
+                this,
+                player.isPlaying,
+                player.mediaMetadata.title?.toString() ?: "Now Playing"
+            )
         )
-            .setMediaDescriptionAdapter(DescriptionAdapter(this))
-            .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
-                override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-                    stopForeground(true)
-                    stopSelf()
-                }
-
-                override fun onNotificationPosted(
-                    notificationId: Int,
-                    notification: Notification,
-                    ongoing: Boolean
-                ) {
-                    startForeground(notificationId, notification)
-                }
-            })
-            .build()
-            .apply {
-                setUseNextAction(true)
-                setUsePreviousAction(true)
-                setUsePlayPauseActions(true)
-                setSmallIcon(R.drawable.group)
-                setPlayer(player)
-            }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
+            MyMusicWidget.ACTION_PLAY_PAUSE -> {
+                if (player.isPlaying) player.pause() else player.play()
+            }
+            MyMusicWidget.ACTION_NEXT -> {
+                player.seekToNext()
+            }
+            MyMusicWidget.ACTION_PREV -> {
+                player.seekToPrevious()
+            }
             "REFRESH_WIDGET" -> {
                 WidgetUpdater.updateStandard(this)
                 WidgetUpdater.updateCircle(this)
             }
         }
+
+        val notification = Notification.createNotification(
+            this,
+            player.isPlaying,
+            player.mediaMetadata.title?.toString() ?: "Now Playing"
+        )
+
+        startForeground(NOTIFICATION_ID, notification)
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    @OptIn(UnstableApi::class) override fun onDestroy() {
-        playerNotificationManager?.setPlayer(null)
+    @OptIn(UnstableApi::class)
+    override fun onDestroy() {
         player.release()
         super.onDestroy()
     }
@@ -100,25 +95,8 @@ class MusicService : Service() {
                 "Music Playback",
                 NotificationManager.IMPORTANCE_LOW
             )
-            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                 .createNotificationChannel(channel)
         }
-    }
-
-    @UnstableApi private class DescriptionAdapter(private val context: Context) :
-        PlayerNotificationManager.MediaDescriptionAdapter {
-
-        override fun getCurrentContentTitle(player: Player): CharSequence {
-            return player.mediaMetadata.title ?: "Now Playing"
-        }
-
-        override fun createCurrentContentIntent(player: Player) = null
-
-        override fun getCurrentContentText(player: Player): CharSequence? = null
-
-        override fun getCurrentLargeIcon(
-            player: Player,
-            callback: PlayerNotificationManager.BitmapCallback
-        ) = null
     }
 }
