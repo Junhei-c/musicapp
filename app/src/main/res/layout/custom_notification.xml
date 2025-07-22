@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:padding="8dp">
+
+
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:scaleType="centerCrop"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/group" />
+
+
+    <LinearLayout
+        android:id="@+id/text_block"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/thumbnail"
+        android:layout_toStartOf="@id/action_buttons"
+        android:orientation="vertical"
+        android:layout_marginEnd="8dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Song Title"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/subtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Now playing on MusicApp"
+            android:textColor="#555555"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/action_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btn_prev"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/prev" />
+
+        <ImageView
+            android:id="@+id/btn_play_pause"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/bigplay" />
+
+        <ImageView
+            android:id="@+id/btn_next"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/next" />
+    </LinearLayout>
+</RelativeLayout>

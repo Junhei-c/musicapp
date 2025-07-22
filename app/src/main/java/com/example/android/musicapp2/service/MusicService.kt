@@ -10,6 +10,7 @@ import android.os.IBinder
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.android.musicapp2.R
 import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.utils.ui.Notification
 import com.example.android.musicapp2.widget.MyMusicWidget
@@ -39,15 +40,6 @@ class MusicService : Service() {
             )
             playWhenReady = true
         }
-
-        startForeground(
-            NOTIFICATION_ID,
-            Notification.createNotification(
-                this,
-                player.isPlaying,
-                player.mediaMetadata.title?.toString() ?: "Now Playing"
-            )
-        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -67,10 +59,18 @@ class MusicService : Service() {
             }
         }
 
+        val song = PlayerManager.getInstance(this).getCurrentData()
+        val title = song?.name ?: "Now Playing"
+        val imageRes = song?.imageRes ?: R.drawable.group
+        val duration = player.duration.takeIf { it > 0 } ?: 1L
+        val progress = ((player.currentPosition.toFloat() / duration) * 100).toInt()
+
         val notification = Notification.createNotification(
-            this,
-            player.isPlaying,
-            player.mediaMetadata.title?.toString() ?: "Now Playing"
+            context = this,
+            isPlaying = player.isPlaying,
+            songTitle = title,
+            imageRes = imageRes,
+            progress = progress
         )
 
         startForeground(NOTIFICATION_ID, notification)
@@ -96,4 +96,5 @@ class MusicService : Service() {
         }
     }
 }
+
 
