@@ -7,7 +7,6 @@ import com.example.android.musicapp2.databinding.ActivityMainBinding
 
 object MiniPlayerHandler {
 
-    /** Draggable functionality for mini and PiP player views */
     @SuppressLint("ClickableViewAccessibility")
     fun makeDraggable(view: View) {
         var dX = 0f

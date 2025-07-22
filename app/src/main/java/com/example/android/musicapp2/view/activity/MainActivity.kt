@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import com.example.android.musicapp2.model.MediaTypeEnum
 import com.example.android.musicapp2.repository.DataRepository
 import com.example.android.musicapp2.service.MusicService
 import com.example.android.musicapp2.utils.datastore.DataStoreManager
+import com.example.android.musicapp2.utils.extensions.show
 import com.example.android.musicapp2.utils.init.PlayerInitializer
 import com.example.android.musicapp2.utils.lifecycle.LifecycleManager
 import com.example.android.musicapp2.utils.manager.PlayerManager
@@ -27,7 +29,6 @@ import com.example.android.musicapp2.utils.mode.ModeToggleHandler
 import com.example.android.musicapp2.utils.pip.PictureInPictureHelper
 import com.example.android.musicapp2.utils.player.PlayerController
 import com.example.android.musicapp2.utils.ui.MiniPlayerHandler
-import com.example.android.musicapp2.utils.ui.Notification.SongInteractionHandler
 import com.example.android.musicapp2.utils.ui.NowPlayingUpdater
 import com.example.android.musicapp2.utils.ui.PlayerUiBinder
 import com.example.android.musicapp2.utils.ui.UiController
@@ -142,24 +143,23 @@ class MainActivity : AppCompatActivity() {
                         selectedIndex = index
 
                         if (song.mediaType == MediaTypeEnum.VIDEO) {
-                            SongInteractionHandler.handleVideoClick(binding, player, song.url)
+                            player.setMediaItem(MediaItem.fromUri(song.url))
+                            player.prepare()
+                            player.playWhenReady = true
+                            binding.pipPlayerView.player = player
+                            binding.pipPlayerView.visibility = View.VISIBLE
+                            binding.pipPlayerView.show()
+                            UiController.hideAudioUI(binding)
                         } else {
-                            playerManager?.getExoPlayer()?.let { exo ->
-                                SongInteractionHandler.handleAudioClick(
-                                    binding = binding,
-                                    song = song,
-                                    index = index,
-                                    playerManager = playerManager!!,
-                                    exoPlayer = exo,
-                                    miniPlayerView = miniPlayerView,
-                                    pipPlayerView = pipPlayerView,
-                                    onWidgetUpdate = {
-                                        triggerWidgetUpdate()
-                                        binding.nowPlayingCard.visibility = View.VISIBLE
-                                        miniPlayerFrame.visibility = View.GONE
-                                    }
-                                )
-                            }
+                            playerManager?.seekTo(index)
+                            playerManager?.resume()
+                            miniPlayerView.player = player
+                            pipPlayerView.player = player
+                            NowPlayingUpdater.update(binding, playerManager!!)
+                            UiController.showAudioUI(binding)
+                            binding.pipPlayerView.visibility = View.GONE
+                            binding.nowPlayingCard.visibility = View.VISIBLE
+                            miniPlayerFrame.visibility = View.GONE
                         }
 
                         if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)
@@ -209,6 +209,7 @@ class MainActivity : AppCompatActivity() {
                     action = MusicService.ACTION_START_FOREGROUND
                     putExtra("isPlaying", it.isPlaying())
                     putExtra("title", song?.name ?: "Now Playing")
+                    putExtra("imageRes", song?.imageRes ?: R.drawable.group)
                 }
 
                 ContextCompat.startForegroundService(this, intent)

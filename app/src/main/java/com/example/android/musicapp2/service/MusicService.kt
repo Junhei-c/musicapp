@@ -7,10 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.utils.ui.Notification
@@ -27,7 +25,6 @@ class MusicService : Service() {
 
     private lateinit var player: ExoPlayer
 
-    @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -80,13 +77,12 @@ class MusicService : Service() {
         return START_STICKY
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    @OptIn(UnstableApi::class)
     override fun onDestroy() {
         player.release()
         super.onDestroy()
     }
+
+    override fun onBind(intent: Intent?): IBinder? = null
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -100,3 +96,4 @@ class MusicService : Service() {
         }
     }
 }
+
