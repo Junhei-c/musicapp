@@ -6,7 +6,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
@@ -25,6 +27,30 @@ class MusicService : Service() {
     }
 
     private lateinit var player: ExoPlayer
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val updateNotificationRunnable = object : Runnable {
+        override fun run() {
+            val song = PlayerManager.getInstance(this@MusicService).getCurrentData()
+            val title = song?.name ?: "Now Playing"
+            val imageRes = song?.imageRes ?: R.drawable.group
+            val duration = player.duration.takeIf { it > 0 } ?: 1L
+            val progress = ((player.currentPosition.toFloat() / duration) * 100).toInt()
+
+            val notification = Notification.createNotification(
+                context = this@MusicService,
+                isPlaying = player.isPlaying,
+                songTitle = title,
+                imageRes = imageRes,
+                progress = progress
+            )
+
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(NOTIFICATION_ID, notification)
+
+            handler.postDelayed(this, 1000) // Update every second
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -74,10 +100,13 @@ class MusicService : Service() {
         )
 
         startForeground(NOTIFICATION_ID, notification)
+        handler.post(updateNotificationRunnable)
+
         return START_STICKY
     }
 
     override fun onDestroy() {
+        handler.removeCallbacks(updateNotificationRunnable)
         player.release()
         super.onDestroy()
     }
@@ -96,5 +125,4 @@ class MusicService : Service() {
         }
     }
 }
-
 
