@@ -56,7 +56,7 @@
         android:max="100"
         android:progress="0"
         android:indeterminate="false"
-        android:progressDrawable="@drawable/custom_progress_red"
+        android:progressDrawable="@drawable/custom_progress"
         android:layout_marginTop="4dp" />
 
     </LinearLayout>
