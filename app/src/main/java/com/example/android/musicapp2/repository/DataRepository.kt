@@ -33,21 +33,21 @@ class DataRepository {
                 id = 4,
                 name = "Bunny Vid",
                 url = "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4",
-                imageRes = R.drawable.group,
+                imageRes = R.drawable.video,
                 mediaType = MediaTypeEnum.VIDEO
             ),
             DataModel(
                 id = 5,
                 name = "Elephant Vid",
                 url = "https://archive.org/download/ElephantsDream/ed_hd.mp4",
-                imageRes = R.drawable.group,
+                imageRes = R.drawable.video,
                 mediaType = MediaTypeEnum.VIDEO
             ),
             DataModel(
                 id = 6,
                 name = "Demo Vid",
                 url = "https://ftp.nluug.nl/pub/graphics/blender/demo/movies/ToS/ToS-4k-1920.mov",
-                imageRes = R.drawable.group,
+                imageRes = R.drawable.video,
                 mediaType = MediaTypeEnum.VIDEO
             )
         )

@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Rational
 import android.view.View
-import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -48,7 +47,6 @@ class MainActivity : AppCompatActivity() {
     private var selectedIndex: Int = -1
     private var currentMode: MediaTypeEnum = MediaTypeEnum.AUDIO
 
-    private lateinit var miniPlayerFrame: FrameLayout
     private lateinit var miniPlayerView: PlayerView
     private lateinit var pipPlayerView: PlayerView
 
@@ -67,7 +65,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         }
 
-        miniPlayerFrame = findViewById(R.id.miniPlayerFrame)
+
         miniPlayerView = findViewById(R.id.miniPlayerView)
         pipPlayerView = findViewById(R.id.pipPlayerView)
 
@@ -119,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                         if (currentMode == MediaTypeEnum.VIDEO && newMode == MediaTypeEnum.AUDIO && player.isPlaying) {
                             MiniPlayerHandler.enterMiniPlayerMode(binding, player)
                         }
-                        if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO && miniPlayerFrame.visibility == View.VISIBLE) {
+                        if (currentMode == MediaTypeEnum.AUDIO && newMode == MediaTypeEnum.VIDEO && miniPlayerView.visibility == View.VISIBLE) {
                             MiniPlayerHandler.exitMiniPlayerMode(binding, player)
                         }
                         currentMode = newMode
@@ -159,7 +157,7 @@ class MainActivity : AppCompatActivity() {
                             UiController.showAudioUI(binding)
                             binding.pipPlayerView.visibility = View.GONE
                             binding.nowPlayingCard.visibility = View.VISIBLE
-                            miniPlayerFrame.visibility = View.GONE
+                            miniPlayerView.visibility = View.GONE
                         }
 
                         if (previousIndex != -1) adapter.notifyItemChanged(previousIndex)

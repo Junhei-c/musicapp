@@ -31,7 +31,7 @@ object MiniPlayerHandler {
 
     fun enterMiniPlayerMode(binding: ActivityMainBinding, player: androidx.media3.exoplayer.ExoPlayer) {
         binding.nowPlayingCard.visibility = View.GONE
-        binding.miniPlayerFrame.visibility = View.VISIBLE
+        binding.miniPlayerView.visibility = View.VISIBLE
         binding.miniPlayerView.player = player
         UiController.showAudioUI(binding)
         binding.pipPlayerView.visibility = View.GONE
@@ -39,11 +39,8 @@ object MiniPlayerHandler {
 
 
     fun exitMiniPlayerMode(binding: ActivityMainBinding, player: androidx.media3.exoplayer.ExoPlayer) {
-        binding.miniPlayerFrame.visibility = View.GONE
+        binding.miniPlayerView.visibility = View.GONE
         binding.nowPlayingCard.visibility = View.VISIBLE
         binding.pipPlayerView.player = player
     }
 }
-
-
-
