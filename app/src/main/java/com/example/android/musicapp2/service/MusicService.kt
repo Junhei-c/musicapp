@@ -13,6 +13,8 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.android.musicapp2.R
+import com.example.android.musicapp2.repository.DataRepository
+import com.example.android.musicapp2.state.ModeStateManager
 import com.example.android.musicapp2.utils.manager.PlayerManager
 import com.example.android.musicapp2.utils.ui.Notification
 import com.example.android.musicapp2.widget.MyMusicWidget
@@ -28,27 +30,12 @@ class MusicService : Service() {
 
     private lateinit var player: ExoPlayer
     private val handler = Handler(Looper.getMainLooper())
+    private val repository = DataRepository() // ✅ Link to DataRepository
 
     private val updateNotificationRunnable = object : Runnable {
         override fun run() {
-            val song = PlayerManager.getInstance(this@MusicService).getCurrentData()
-            val title = song?.name ?: "Now Playing"
-            val imageRes = song?.imageRes ?: R.drawable.group
-            val duration = player.duration.takeIf { it > 0 } ?: 1L
-            val progress = ((player.currentPosition.toFloat() / duration) * 100).toInt()
-
-            val notification = Notification.createNotification(
-                context = this@MusicService,
-                isPlaying = player.isPlaying,
-                songTitle = title,
-                imageRes = imageRes,
-                progress = progress
-            )
-
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.notify(NOTIFICATION_ID, notification)
-
-            handler.postDelayed(this, 1000) // Update every second
+            updateNotificationAndWidgets()
+            handler.postDelayed(this, 1000)
         }
     }
 
@@ -72,20 +59,65 @@ class MusicService : Service() {
         when (intent?.action) {
             MyMusicWidget.ACTION_PLAY_PAUSE -> {
                 if (player.isPlaying) player.pause() else player.play()
+                WidgetUpdater.updateStandard(this)
+                WidgetUpdater.updateCircle(this)
             }
+
             MyMusicWidget.ACTION_NEXT -> {
-                player.seekToNext()
+                PlayerManager.getInstance(this).playNext()
+                WidgetUpdater.updateStandard(this)
+                WidgetUpdater.updateCircle(this)
             }
+
             MyMusicWidget.ACTION_PREV -> {
-                player.seekToPrevious()
+                PlayerManager.getInstance(this).playPrevious()
+                WidgetUpdater.updateStandard(this)
+                WidgetUpdater.updateCircle(this)
             }
+
+            MyMusicWidget.ACTION_MODE1 -> {
+                ModeStateManager.selectedMode = 0
+                switchPlaylist(0)
+            }
+
+            MyMusicWidget.ACTION_MODE2 -> {
+                ModeStateManager.selectedMode = 1
+                switchPlaylist(1)
+            }
+
+            MyMusicWidget.ACTION_MODE3 -> {
+                ModeStateManager.selectedMode = 2
+                switchPlaylist(2)
+            }
+
             "REFRESH_WIDGET" -> {
                 WidgetUpdater.updateStandard(this)
                 WidgetUpdater.updateCircle(this)
             }
         }
 
-        val song = PlayerManager.getInstance(this).getCurrentData()
+        updateNotificationAndWidgets()
+        handler.post(updateNotificationRunnable)
+        return START_STICKY
+    }
+
+    private fun switchPlaylist(mode: Int) {
+        val playerManager = PlayerManager.getInstance(this)
+        val newPlaylist = repository.getSongsForMode(mode)
+
+        if (newPlaylist.isNotEmpty()) {
+            playerManager.setPlaylist(newPlaylist)
+            playerManager.seekTo(0)
+            playerManager.resume()
+        }
+
+        WidgetUpdater.updateStandard(this)
+        WidgetUpdater.updateCircle(this)
+    }
+
+    private fun updateNotificationAndWidgets() {
+        val playerManager = PlayerManager.getInstance(this)
+        val song = playerManager.getCurrentData()
         val title = song?.name ?: "Now Playing"
         val imageRes = song?.imageRes ?: R.drawable.group
         val duration = player.duration.takeIf { it > 0 } ?: 1L
@@ -99,10 +131,11 @@ class MusicService : Service() {
             progress = progress
         )
 
-        startForeground(NOTIFICATION_ID, notification)
-        handler.post(updateNotificationRunnable)
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, notification)
 
-        return START_STICKY
+        WidgetUpdater.updateStandard(this)
+        WidgetUpdater.updateCircle(this)
     }
 
     override fun onDestroy() {
@@ -125,4 +158,3 @@ class MusicService : Service() {
         }
     }
 }
-

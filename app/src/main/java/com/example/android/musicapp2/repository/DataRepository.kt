@@ -52,6 +52,16 @@ class DataRepository {
             )
         )
     }
+
+    fun getSongsForMode(mode: Int): List<DataModel> {
+        return when (mode) {
+            0 -> getMediaList().filter { it.imageRes == R.drawable.earlybirds } // Earlybirds
+            1 -> getMediaList().filter { it.imageRes == R.drawable.chime }      // Chime
+            2 -> getMediaList().filter { it.imageRes == R.drawable.bigpiano }   // Piano
+            else -> getMediaList().filter { it.mediaType.name == "AUDIO" }      // Default audio
+        }
+    }
+
 }
 
 

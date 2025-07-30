@@ -45,6 +45,7 @@ class PlayerManager private constructor(private val context: Context) {
                 ).build()
         }
         handler.post {
+            player.clearMediaItems()
             player.setMediaItems(mediaItems)
             player.prepare()
             player.playWhenReady = false
@@ -133,6 +134,7 @@ class PlayerManager private constructor(private val context: Context) {
 
     fun release() = player.release()
 
+
     companion object {
         @Volatile private var instance: PlayerManager? = null
 
@@ -142,6 +144,7 @@ class PlayerManager private constructor(private val context: Context) {
             }
     }
 }
+
 
 
 
